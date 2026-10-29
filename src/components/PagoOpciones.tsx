@@ -20,7 +20,7 @@ import styles from './PagoOpciones.module.css';
 export default function PagoOpciones({ onPagado }: { onPagado?: () => void }) {
   const { user, userData, refreshUserData } = useAuth();
   const [pago, setPago] = useState<DatosPago | null>(null);
-  const [tab, setTab] = useState<'transferencia' | 'tarjeta'>('transferencia');
+  const [tab, setTab] = useState<'transferencia' | 'tarjeta'>('tarjeta');
   const [enviando, setEnviando] = useState(false);
   const [checkout, setCheckout] = useState(false);
 
@@ -30,8 +30,6 @@ export default function PagoOpciones({ onPagado }: { onPagado?: () => void }) {
         const snap = await getDoc(doc(db, PAGO_DOC.col, PAGO_DOC.id));
         const p = mergePago(snap.exists() ? (snap.data() as Partial<DatosPago>) : {});
         setPago(p);
-        // Con tarjeta activa, es la opción más rápida: la mostramos primero
-        if (p.hotmartActivo && p.hotmartUrl) setTab('tarjeta');
       } catch {
         setPago(mergePago({}));
       }
@@ -175,6 +173,14 @@ export default function PagoOpciones({ onPagado }: { onPagado?: () => void }) {
             <div className={styles.aviso}>
               <strong>Próximamente.</strong> El pago con tarjeta se está configurando.
               Por ahora usá transferencia — te liberamos el acceso en hasta 1 hora.
+              <button
+                type="button"
+                onClick={() => setTab('transferencia')}
+                className="btn btn-primary"
+                style={{ width: '100%', marginTop: 14 }}
+              >
+                <FaUniversity /> Pagar por transferencia
+              </button>
             </div>
           )}
         </div>

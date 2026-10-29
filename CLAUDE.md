@@ -67,7 +67,8 @@ publica em produção; push em outra branch gera só uma prévia (preview).
 
 ## 4. Deploy
 
-Automático: **push na `main` = deploy de produção.** Acompanhe em Vercel →
+Automático: **push na `main` = deploy de produção.** O usuário não quer prévias:
+commite e faça push **direto na `main`**, sem branch nem pull request. Acompanhe em Vercel →
 Deployments, ou pelo status do commit no GitHub.
 
 Prévias (outras branches) ganham URL própria, mas: só recebem as env vars

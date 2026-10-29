@@ -160,7 +160,7 @@ export default function AdminPago() {
               <li>Tiene <strong>{TRIAL_LIMITE} clics</strong>: cada link del menú y cada tarjeta de proveedor que abre cuenta uno.</li>
               <li>En el quinto clic el contenido se desenfoca y aparece el popup de pago.</li>
               <li>Si avisa que transfirió, aparece acá en <strong>Usuarios</strong> con el aviso, y vos liberás el acceso.</li>
-              <li>Con tarjeta (Hotmart) el acceso tendría que liberarse solo — eso requiere conectar el webhook de Hotmart, que todavía no está hecho.</li>
+              <li>Con tarjeta (Hotmart) el acceso se libera solo, apenas Hotmart aprueba el pago, y te llega un email avisando. Para eso, en Hotmart → Herramientas → Webhook, cargá la URL <code>https://mayorista-brasil.vercel.app/api/hotmart-webhook</code> (versión 2.0.0).</li>
             </ul>
           </div>
 

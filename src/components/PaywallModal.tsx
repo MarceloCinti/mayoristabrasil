@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { FiCreditCard, FiCopy, FiCheck, FiClock, FiLock } from 'react-icons/fi';
 import { FaWhatsapp, FaUniversity } from 'react-icons/fa';
 import toast from 'react-hot-toast';
@@ -48,6 +48,31 @@ export default function PaywallModal() {
       }
     })();
   }, []);
+
+  // Pago con tarjeta: el webhook de Hotmart marca `pago` en el servidor.
+  // Escuchamos el doc del usuario para destrabar la pantalla apenas pasa,
+  // sin que tenga que recargar.
+  useEffect(() => {
+    if (!user) return;
+    return onSnapshot(doc(db, 'usuarios', user.uid), snap => {
+      if (snap.data()?.pago && !userData?.pago) refreshUserData();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, userData?.pago]);
+
+  // sck = uid: Hotmart lo devuelve en el webhook y así sabemos quién pagó
+  // aunque use otro email en el checkout. `email` solo precarga el formulario.
+  const linkHotmart = (url: string) => {
+    if (!user) return url;
+    try {
+      const u = new URL(url);
+      u.searchParams.set('sck', user.uid);
+      if (user.email) u.searchParams.set('email', user.email);
+      return u.toString();
+    } catch {
+      return url;
+    }
+  };
 
   const mensaje = 'Hola, quiero activar mi acceso a Mayorista Brasil. Mi correo es: ' + (user?.email || '');
   const wpp = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(mensaje);
@@ -189,7 +214,7 @@ export default function PaywallModal() {
                   apenas se confirma el pago.
                 </p>
                 <a
-                  href={pago.hotmartUrl}
+                  href={linkHotmart(pago.hotmartUrl)}
                   target="_blank"
                   rel="noreferrer"
                   className="btn btn-primary"

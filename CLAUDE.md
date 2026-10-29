@@ -33,7 +33,7 @@ cada um mora e como obtê-lo.
 
 | O quê | Onde | Observação |
 |---|---|---|
-| Variáveis de ambiente (13) | `.env.local` (local) e painel do Vercel (produção) | Já configuradas nos dois lugares. `vercel env ls production` lista os nomes. |
+| Variáveis de ambiente (13 + 2 do webhook Hotmart) | `.env.local` (local) e painel do Vercel (produção) | Já configuradas nos dois lugares. `vercel env ls production` lista os nomes. |
 | Conta Google dona de tudo | `contingenciamc1@gmail.com` | Dona do projeto Firebase e da conta Vercel. O usuário às vezes está logado em **outra** conta Google e o projeto some da lista do Firebase. |
 | Vercel | conta `contingenciamc1-3536`, projeto `mayorista-brasil` | `projectId` e `orgId` em `.vercel/project.json`. `vercel whoami` confirma o login. |
 | Firebase | projeto `mayorista-brasil` | Console: https://console.firebase.google.com/project/mayorista-brasil |
@@ -190,10 +190,16 @@ Vermelho sobrevive só onde significa **perigo** (excluir, erro), não marca.
    do projeto. Rode **logo após** o import — links velhos nem dão para baixar.
    O script precisa da chave de serviço e é seguro repetir.
 
-2. **Hotmart não libera acesso sozinho.** Existe a aba e o link, mas a liberação
-   automática exige um webhook (endpoint que recebe a confirmação da Hotmart e
-   marca `pago: true`). **Não foi feito.** Hoje cartão também precisa de
-   liberação manual. O usuário pediu "liberação imediata" — isso ainda não existe.
+2. **Webhook da Hotmart: código no ar, falta configurar.** `src/pages/api/hotmart-webhook.ts`
+   libera `pago: true` quando a Hotmart aprova o cartão (e revoga em reembolso/
+   contracargo). Acha o usuário pelo `sck=<uid>` que o `PaywallModal` põe no link
+   de pagamento; senão pelo e-mail; senão manda e-mail ao admin para liberar à mão.
+   Loga cada evento em `pagosHotmart/{transação}` (via admin SDK, sem mexer nas
+   regras). Sem as duas env vars abaixo, responde 500 e a Hotmart reenvia depois:
+   - `FIREBASE_SERVICE_ACCOUNT` — JSON da chave de serviço (ver `src/lib/firebaseAdmin.ts`)
+   - `HOTMART_HOTTOK` — token da tela Hotmart → Ferramentas → Webhook
+   URL a cadastrar na Hotmart: `https://mayorista-brasil.vercel.app/api/hotmart-webhook` (versão 2.0.0).
+   Cancelamento de assinatura **não** revoga o acesso (não há controle de vencimento no sistema).
 
 3. **Dados de transferência vazios.** Preencher em `/admin/datos-pago`. Enquanto
    vazio, o popup mostra um botão de pedir os dados por WhatsApp.
@@ -213,7 +219,8 @@ src/
     continuar.tsx        roteador pós-login — entenda este antes de mexer em fluxo
     dashboard/           área paga
     admin/               painel administrativo
-    api/enviar-*.ts      e-mails via Brevo (únicas rotas de servidor)
+    api/enviar-*.ts      e-mails via Brevo
+    api/hotmart-webhook.ts  libera acesso de quem pagou com cartão (admin SDK)
   components/
     DashboardLayout.tsx  menu + contagem de cliques + paywall
     PaywallModal.tsx     popup de pagamento

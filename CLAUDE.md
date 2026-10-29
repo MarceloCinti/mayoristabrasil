@@ -190,16 +190,19 @@ Vermelho sobrevive só onde significa **perigo** (excluir, erro), não marca.
    do projeto. Rode **logo após** o import — links velhos nem dão para baixar.
    O script precisa da chave de serviço e é seguro repetir.
 
-2. **Webhook da Hotmart: código no ar, falta configurar.** `src/pages/api/hotmart-webhook.ts`
+2. **Webhook da Hotmart: ligado (29/10/2026).** `src/pages/api/hotmart-webhook.ts`
    libera `pago: true` quando a Hotmart aprova o cartão (e revoga em reembolso/
    contracargo). Acha o usuário pelo `sck=<uid>` que o `PaywallModal` põe no link
    de pagamento; senão pelo e-mail; senão manda e-mail ao admin para liberar à mão.
    Loga cada evento em `pagosHotmart/{transação}` (via admin SDK, sem mexer nas
-   regras). Sem as duas env vars abaixo, responde 500 e a Hotmart reenvia depois:
-   - `FIREBASE_SERVICE_ACCOUNT` — JSON da chave de serviço (ver `src/lib/firebaseAdmin.ts`)
+   regras). Env vars no Vercel (produção) e no `.env.local`:
+   - `FIREBASE_SERVICE_ACCOUNT` — JSON da chave de serviço em base64 (cópia em `scripts/serviceAccount.json`)
    - `HOTMART_HOTTOK` — token da tela Hotmart → Ferramentas → Webhook
-   URL a cadastrar na Hotmart: `https://mayorista-brasil.vercel.app/api/hotmart-webhook` (versão 2.0.0).
+   Webhook `mayoristabr` cadastrado na Hotmart só para o produto Mayorista Brasil
+   (a conta tem outro produto: **não** ampliar para "todos os produtos", senão
+   compra do outro produto com o mesmo e-mail liberaria acesso).
    Cancelamento de assinatura **não** revoga o acesso (não há controle de vencimento no sistema).
+   Falta: confirmar com uma compra real.
 
 3. **Dados de transferência vazios.** Preencher em `/admin/datos-pago`. Enquanto
    vazio, o popup mostra um botão de pedir os dados por WhatsApp.

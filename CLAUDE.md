@@ -60,11 +60,21 @@ Fora do versionamento, por design: `.env.local`, `.vercel/`, `node_modules/`,
 `.next/`, a chave de serviço do Firebase, e um `.docx` pessoal solto na raiz.
 O antigo `sifat/` (outro projeto) foi movido para `C:\sifat`.
 
-O deploy no Vercel continua sendo pela CLI (`vercel --prod`), não pelo GitHub.
+O Vercel está **ligado ao GitHub** (Settings → Git do projeto): push na `main`
+publica em produção; push em outra branch gera só uma prévia (preview).
 
 ---
 
 ## 4. Deploy
+
+Automático: **push na `main` = deploy de produção.** Acompanhe em Vercel →
+Deployments, ou pelo status do commit no GitHub.
+
+Prévias (outras branches) ganham URL própria, mas: só recebem as env vars
+marcadas como *Preview* no Vercel, e o login do Firebase não funciona nelas
+(o domínio da prévia não está entre os domínios autorizados do Firebase Auth).
+
+A CLI continua funcionando como alternativa manual:
 
 ```bash
 vercel --prod --yes

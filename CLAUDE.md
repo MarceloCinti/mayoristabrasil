@@ -202,7 +202,9 @@ Vermelho sobrevive só onde significa **perigo** (excluir, erro), não marca.
    (a conta tem outro produto: **não** ampliar para "todos os produtos", senão
    compra do outro produto com o mesmo e-mail liberaria acesso).
    Cancelamento de assinatura **não** revoga o acesso (não há controle de vencimento no sistema).
-   Falta: confirmar com uma compra real.
+   Falta: confirmar com uma compra real. Em 29/10/2026 o link do produto
+   (`pay.hotmart.com/B108243731O`) dava "Produto indisponível" e `config/pago.hotmartActivo`
+   estava desligado — só ativar em `/admin/datos-pago` quando o checkout abrir.
 
 3. **Dados de transferência vazios.** Preencher em `/admin/datos-pago`. Enquanto
    vazio, o popup mostra um botão de pedir os dados por WhatsApp.
@@ -220,13 +222,15 @@ src/
   pages/
     index.tsx            landing (~640 linhas)
     continuar.tsx        roteador pós-login — entenda este antes de mexer em fluxo
+    comprar.tsx          página de pagamento própria (link fixo para WhatsApp/anúncios)
     dashboard/           área paga
     admin/               painel administrativo
     api/enviar-*.ts      e-mails via Brevo
     api/hotmart-webhook.ts  libera acesso de quem pagou com cartão (admin SDK)
   components/
     DashboardLayout.tsx  menu + contagem de cliques + paywall
-    PaywallModal.tsx     popup de pagamento
+    PaywallModal.tsx     popup de pagamento (moldura + espera da transferência)
+    PagoOpciones.tsx     abas cartão/transferência; checkout Hotmart em iframe por cima do site
     HeroCarrusel.tsx     banner da landing (fotos e preços na const SLIDES)
     Foto.tsx             imagem com fallback
     ProveedorCard.tsx    card + modal do fornecedor

@@ -10,6 +10,5 @@ scripts/
 *.log
 dev.log
 
-# Não é deste projeto (ver .gitignore)
-sifat/
+# Não é deste projeto
 Nota_Solicitud_Donacion_Record_Electric.docx

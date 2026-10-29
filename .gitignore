@@ -16,10 +16,7 @@ scripts/serviceAccount.json
 serviceAccount*.json
 *-firebase-adminsdk-*.json
 
-# ===== Arquivos que NÃO são deste projeto =====
-# sifat/ é um sistema Python de fiscalização de trânsito, completo e com
-# .gitignore próprio — deveria viver na pasta e no repositório dele.
-# Está ignorado aqui para não misturar dois projetos no mesmo histórico.
-sifat/
-# Documento pessoal solto na raiz
+# ===== Não é deste projeto =====
+# sifat/ (sistema Python de trânsito) foi movido para C:\sifat e tem o
+# repositório próprio. Documento pessoal solto na raiz:
 Nota_Solicitud_Donacion_Record_Electric.docx

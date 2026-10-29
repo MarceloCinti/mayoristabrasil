@@ -47,19 +47,21 @@ As `BREVO_*` são de servidor e nunca devem ganhar o prefixo `NEXT_PUBLIC_`.
 
 ---
 
-## 3. Não existe controle de versão
+## 3. Controle de versão
 
-**Este projeto não é um repositório git.** Não há branches, merge, histórico,
-diff nem rollback. Consequências práticas:
+Repositório git local na branch `main`. O commit inicial (`70d06d9`) contém todo
+o projeto. **Não há remoto configurado** — o histórico existe só nesta máquina,
+então não há backup fora daqui nem como duas pessoas colaborarem ainda. Para
+isso, criar um repositório privado no GitHub e `git remote add origin ...`.
 
-- Antes de qualquer alteração ampla, **faça cópia dos arquivos** que vai tocar.
-- Um erro de edição em massa não tem desfazer.
-- Deploys vão direto da pasta local para produção, sem revisão.
+Fora do versionamento, por design: `.env.local`, `.vercel/`, `node_modules/`,
+`.next/`, a chave de serviço do Firebase.
 
-Recomendação para quem assume: rodar `git init`, commitar o estado atual e
-passar a trabalhar com commits. O `.gitignore` já está preparado (ignora
-`.env.local`, `.vercel`, `node_modules`, a chave de serviço). Isso é a melhoria
-de processo mais valiosa pendente.
+**Atenção — há outro projeto dentro desta pasta.** `sifat/` é um sistema Python
+de fiscalização de trânsito (2.684 arquivos, 45 MB) com `.gitignore` próprio,
+mais um `.docx` pessoal na raiz. Nada disso é do Mayorista. Está ignorado no git
+e no `.vercelignore` para não misturar históricos nem subir 45 MB de código
+alheio a cada deploy. O ideal é mover `sifat/` para fora desta pasta.
 
 ---
 

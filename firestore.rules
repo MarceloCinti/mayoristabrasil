@@ -1,0 +1,142 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.esAdmin == true;
+    }
+
+    function datosUsuario() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+
+    // Acceso de PRUEBA: al registrarse el usuario puede ver el contenido hasta
+    // agotar TRIAL_LIMITE secciones distintas (ver src/lib/trial.ts).
+    // Mantener este número igual al del código.
+    function enPrueba() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
+        datosUsuario().get('trialVistas', []).size() < 5;
+    }
+
+    // Puede LEER el contenido: pagó, es admin, o está en prueba.
+    function puedeVerContenido() {
+      return isPagado() || enPrueba();
+    }
+
+    function isPagado() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
+        (get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.pago == true ||
+         get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.esAdmin == true);
+    }
+
+    // Usuarios: cada uno crea/lee su propio doc; admin lee todos y modifica `pago`
+    match /usuarios/{uid} {
+      // Lee: el propio usuario, el admin, o un afiliado leyendo a SUS referidos
+      allow read: if isSignedIn() && (
+        request.auth.uid == uid ||
+        isAdmin() ||
+        (resource.data.referidoPor != null &&
+         resource.data.referidoPor == get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.codigoAfiliado)
+      );
+      allow create: if isSignedIn() && request.auth.uid == uid &&
+                      request.resource.data.pago == false &&
+                      (request.resource.data.esAdmin == false ||
+                       request.auth.token.email == 'contingenciamc1@gmail.com');
+      // Usuario puede actualizar su nombre, pero NO campos sensibles (pago, rol, afiliado, comisiones)
+      allow update: if isSignedIn() && request.auth.uid == uid &&
+                      request.resource.data.pago == resource.data.pago &&
+                      request.resource.data.esAdmin == resource.data.esAdmin &&
+                      request.resource.data.get('esAfiliado', false) == resource.data.get('esAfiliado', false) &&
+                      request.resource.data.get('codigoAfiliado', '') == resource.data.get('codigoAfiliado', '') &&
+                      request.resource.data.get('comisionPorcentaje', 0) == resource.data.get('comisionPorcentaje', 0) &&
+                      request.resource.data.get('referidoPor', '') == resource.data.get('referidoPor', '') &&
+                      request.resource.data.get('comisionLiquidada', false) == resource.data.get('comisionLiquidada', false) &&
+                      request.resource.data.get('archivado', false) == resource.data.get('archivado', false) &&
+                      request.resource.data.get('vip', false) == resource.data.get('vip', false) &&
+                      request.resource.data.get('tipoPlan', 'unico') == resource.data.get('tipoPlan', 'unico') &&
+                      request.resource.data.get('suscripcionVence', '') == resource.data.get('suscripcionVence', '') &&
+                      // el contador de prueba sólo puede crecer: si pudiera bajar,
+                      // cualquiera lo resetearía y tendría acceso ilimitado
+                      request.resource.data.get('trialVistas', []).size() >= resource.data.get('trialVistas', []).size();
+      // Admin puede liberar/revocar acceso y gestionar afiliados/comisiones
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Solicitudes de afiliación (el admin aprueba)
+    match /solicitudesAfiliado/{id} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Proveedores: solo usuarios pagados pueden leer; solo admin escribe
+    match /proveedores/{id} {
+      allow read: if puedeVerContenido();
+      allow write: if isAdmin();
+    }
+
+    // Contenido (mapa, importar, tendencias, estafas): igual que proveedores
+    match /contenido/{id} {
+      allow read: if puedeVerContenido();
+      allow write: if isAdmin();
+    }
+
+    // Bonos: igual que proveedores
+    match /bonos/{id} {
+      allow read: if puedeVerContenido();
+      allow write: if isAdmin();
+    }
+
+    // Configuración de la landing: lectura pública (la landing es pública), escritura solo admin
+    match /config/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Favoritos: cada usuario gestiona los suyos
+    match /favoritos/{id} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // Reseñas / comentarios: las leen los usuarios pagados; cada uno escribe la suya
+    match /resenas/{id} {
+      allow read: if puedeVerContenido();
+      allow create: if isPagado() && request.resource.data.uid == request.auth.uid;
+      // El dueño puede editar/borrar su reseña
+      allow update: if isSignedIn() && resource.data.uid == request.auth.uid;
+      // Otros usuarios pagados solo pueden dar like o responder (campos likes / respuestas)
+      allow update: if isPagado() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'respuestas']);
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // Solicitudes de cambio de moneda (R$/Gs)
+    match /solicitudesCambio/{id} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow create: if isPagado() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Solicitudes de cobro de afiliados
+    match /solicitudesPago/{id} {
+      // Lee: admin todas; el afiliado solo las suyas
+      allow read: if isAdmin() || (isSignedIn() && resource.data.afiliadoUid == request.auth.uid);
+      // Crea: el afiliado crea su propia solicitud
+      allow create: if isSignedIn() && request.resource.data.afiliadoUid == request.auth.uid;
+      // Actualiza/elimina: solo admin (marcar pagado)
+      allow update, delete: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,15 @@
+# Credenciais — nunca devem sair desta máquina
+scripts/serviceAccount.json
+serviceAccount*.json
+*-firebase-adminsdk-*.json
+
+# Scripts de manutenção: rodam localmente, não fazem parte do site
+scripts/
+
+# Arquivos de trabalho
+*.log
+dev.log
+
+# Não é deste projeto (ver .gitignore)
+sifat/
+Nota_Solicitud_Donacion_Record_Electric.docx

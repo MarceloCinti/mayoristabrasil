@@ -1,0 +1,81 @@
+.title { font-size: 30px; font-weight: 600; margin-bottom: 6px; }
+.subtitle { color: var(--text-mut); margin-bottom: 30px; }
+
+.notice { background: var(--bg-card); border: 1px dashed var(--border-strong); border-radius: 14px; padding: 28px; text-align: center; color: var(--text-mut); }
+
+.linkCard { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 22px; }
+.linkLabel { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-mut); margin-bottom: 12px; }
+.linkRow { display: flex; gap: 10px; flex-wrap: wrap; }
+.linkInput { flex: 1; min-width: 200px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; }
+.shareWpp { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; color: var(--wpp); font-size: 14px; font-weight: 500; }
+
+.statsGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 22px; }
+.statCard { display: flex; align-items: center; gap: 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+.statPend { flex-wrap: wrap; }
+.statIcon { font-size: 24px; color: var(--azul); flex-shrink: 0; }
+.statCard span { font-size: 12px; color: var(--text-mut); display: block; }
+.statCard strong { font-size: 22px; font-family: var(--font-display); }
+.pend { color: var(--oro); }
+.cobrarBtn { background: linear-gradient(135deg, var(--verde), #0B5F2B); color: #fff; font-size: 13px; font-weight: 600; padding: 9px 14px; border-radius: 980px; white-space: nowrap; }
+.cobrarBtn:disabled { opacity: .4; cursor: not-allowed; }
+.enProceso { display: block; font-size: 11px; color: var(--oro); margin-top: 2px; }
+
+.solicitudesWrap { margin-bottom: 22px; }
+.solicitudesTitle { font-size: 18px; font-weight: 600; margin-bottom: 14px; }
+.solicitudesGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+.solCard { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+.solHead { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+.solNum { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 13px; color: var(--text-mut); }
+.solBadge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+.solAnalisis { background: rgba(245,181,68,.15); color: var(--oro); }
+.solPagado { background: rgba(18,128,59,.15); color: var(--verde); }
+.solMonto { font-family: var(--font-display); font-size: 24px; font-weight: 600; }
+.solFecha { font-size: 12px; color: var(--text-mut); }
+.solPagoInfo { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+.solPagoInfo > span { font-size: 12px; color: var(--verde); }
+.verComprobante { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; color: var(--azul); }
+.verComprobante:hover { text-decoration: underline; }
+.sinComprobante { font-size: 12px; color: var(--text-mut); font-style: italic; }
+
+.tableCard { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+.tableCard h2 { font-size: 18px; font-weight: 600; margin-bottom: 18px; }
+.empty { color: var(--text-mut); text-align: center; padding: 30px; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
+.table th { color: var(--text-mut); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+.badge { display: inline-block; padding: 3px 9px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+.badgePagado { background: rgba(18,128,59,.15); color: var(--verde); }
+.badgePend { background: rgba(148,163,184,.15); color: var(--text-mut); }
+.cobrado { color: var(--verde); font-weight: 600; }
+.porCobrar { color: var(--oro); font-weight: 600; }
+
+/* ===== Popup ===== */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
+.modal { background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 20px; width: 100%; max-width: 480px; max-height: 92vh; display: flex; flex-direction: column; }
+.modalHead { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+.modalHead h3 { font-size: 18px; font-weight: 600; }
+.modalHead button { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-mut); }
+.modalHead button:hover { background: var(--bg-2); color: var(--text); }
+.modalBody { padding: 20px 24px; overflow-y: auto; }
+.modalFooter { display: flex; gap: 12px; padding: 16px 24px; border-top: 1px solid var(--border); }
+
+.montoBox { display: flex; justify-content: space-between; align-items: center; background: rgba(18,128,59,.08); border: 1px solid rgba(18,128,59,.25); border-radius: 12px; padding: 14px 18px; margin-bottom: 22px; }
+.montoBox span { color: var(--text-mut); font-size: 14px; }
+.montoBox strong { font-family: var(--font-display); font-size: 24px; color: var(--verde); }
+
+.cuentasTitle { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+.cuentasEmpty { color: var(--text-mut); font-size: 13px; margin-bottom: 14px; }
+.cuentaItem { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: border-color .15s; }
+.cuentaItem:hover { border-color: var(--border-strong); }
+.cuentaSel { border-color: var(--verde); background: rgba(18,128,59,.05); }
+.cuentaItem input[type=radio] { width: auto; }
+.cuentaInfo { flex: 1; }
+.cuentaInfo strong { display: block; font-size: 14px; }
+.cuentaInfo span { display: block; font-size: 12px; color: var(--text-mut); }
+.cuentaDel { color: #f87171; padding: 6px; }
+.cuentaDel:hover { color: #ef4444; }
+
+.addForm { display: flex; flex-direction: column; gap: 6px; padding: 16px; border: 1px dashed var(--border-strong); border-radius: 12px; margin-top: 6px; }
+.addForm label { font-size: 12px; color: var(--text-mut); margin-top: 6px; }
+.addBtn { display: inline-flex; align-items: center; gap: 8px; padding: 12px; width: 100%; justify-content: center; border: 1px dashed var(--border-strong); border-radius: 12px; color: var(--text-mut); font-size: 14px; font-weight: 500; margin-top: 6px; }
+.addBtn:hover { color: var(--text); border-color: var(--text-mut); }

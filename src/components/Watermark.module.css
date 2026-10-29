@@ -1,0 +1,85 @@
+/* `div.wrap` (no `.wrap`) para ganar en especificidad a la regla
+   `.section > * { position: relative; z-index: 1 }` de la landing, que si no
+   sacaría la marca de agua del overlay y la metería en el flujo. */
+div.wrap { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+
+/* Rejilla de líneas rotadas que cubren toda la sección */
+.rows {
+  position: absolute; top: 50%; left: 50%;
+  width: 190%; height: 190%;
+  transform: translate(-50%, -50%) rotate(-18deg);
+  display: flex; flex-direction: column; justify-content: center;
+  gap: clamp(8px, 2.4vh, 30px);
+}
+
+/* Texto en CONTORNO (no relleno): se ve como filigrana de papel de lujo */
+.row {
+  display: flex; white-space: nowrap;
+  font-family: var(--font-serif);
+  font-weight: 800;
+  font-size: clamp(26px, 4.6vw, 60px);
+  letter-spacing: .06em;
+  color: transparent;
+  -webkit-text-stroke: 1.1px var(--text);
+  opacity: .07;
+  animation-name: wmSlide;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+.row > span { padding-right: .6em; }
+.rev { animation-direction: reverse; }
+
+/* Variante HORIZONTAL: sin inclinación, ocupa toda la sección */
+.horiz {
+  top: 0; left: 0; width: 100%; height: 100%;
+  transform: none;
+  justify-content: space-between;
+  gap: 0;
+  padding: 14px 0;
+}
+/* Variante CHICA: ~50% del tamaño y trazo más fino */
+.small {
+  font-size: clamp(13px, 2.3vw, 30px);
+  -webkit-text-stroke-width: .8px;
+  letter-spacing: .05em;
+}
+
+/* Variante SÓLIDA: letras rellenas (sin contorno) */
+.solid { -webkit-text-stroke-width: 0; color: var(--text); }
+.seq { display: inline-flex; white-space: nowrap; }
+.sep { font-style: normal; opacity: .45; }
+
+/* Color animado por PALABRA: cada una cicla verde → amarillo → azul (bandera
+   de Brasil) con su propio desfase, así el conjunto se ve aleatorio y vivo. */
+.word {
+  color: #12803B;
+  animation: wmHue 10.8s linear infinite;
+}
+@keyframes wmHue {
+  0%, 100% { color: #12803B; }
+  33%      { color: #F2C40C; }
+  66%      { color: #1D3F94; }
+}
+@media (prefers-reduced-motion: reduce) { .word { animation: none; } }
+
+@keyframes wmSlide {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Brillo diagonal que barre lentamente (toque "premium") */
+.sheen {
+  position: absolute; inset: -60%;
+  background: linear-gradient(115deg, transparent 42%, var(--wm-sheen) 50%, transparent 58%);
+  animation: wmSheen 11s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes wmSheen {
+  from { transform: translateX(-26%); }
+  to   { transform: translateX(26%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row, .sheen { animation: none !important; }
+}

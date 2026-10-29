@@ -1,0 +1,38 @@
+.header {
+  display: flex; gap: 16px; align-items: center; margin-bottom: 28px;
+}
+.icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  background: var(--bg-elev); display: flex; align-items: center; justify-content: center;
+  font-size: 26px; color: var(--br-verde); flex-shrink: 0;
+}
+.header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+.header p { color: var(--text-mut); font-size: 15px; margin-top: 2px; }
+
+.contenido {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 32px; line-height: 1.7; font-size: 15px;
+}
+.contenido h2 { font-size: 22px; font-weight: 700; margin: 28px 0 12px; }
+.contenido h3 { font-size: 18px; font-weight: 600; margin: 24px 0 10px; color: var(--br-verde); }
+.contenido p { margin-bottom: 14px; color: var(--text); }
+.contenido ul, .contenido ol { margin: 12px 0 16px 24px; }
+.contenido li { margin-bottom: 6px; }
+.contenido a { color: var(--br-verde); text-decoration: underline; }
+.contenido img { max-width: 100%; border-radius: 8px; margin: 16px 0; }
+.contenido strong { color: var(--text); }
+
+.empty {
+  text-align: center; padding: 60px 24px; color: var(--text-mut);
+  background: var(--bg-card); border: 1px dashed var(--border); border-radius: 14px;
+}
+
+.skeleton {
+  height: 300px; background: var(--bg-card); border-radius: 14px;
+  border: 1px solid var(--border);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}

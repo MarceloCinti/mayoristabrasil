@@ -1,0 +1,164 @@
+.header { margin-bottom: 32px; }
+.header h1 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+.header p { color: var(--text-mut); }
+
+.statsGrid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;
+  margin-bottom: 32px;
+}
+.statCard {
+  display: flex; gap: 16px; align-items: center;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 20px;
+}
+.statIcon { font-size: 28px; flex-shrink: 0; }
+.statLabel { font-size: 12px; color: var(--text-mut); text-transform: uppercase; letter-spacing: 1px; }
+.statValue { font-size: 28px; font-weight: 700; }
+
+.quickGrid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;
+}
+.quickCard {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 20px; transition: border-color .12s, transform .12s;
+}
+.quickCard:hover { transform: translateY(-2px); border-color: var(--py-rojo); }
+.quickCard h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.quickCard p { font-size: 13px; color: var(--text-mut); }
+.quickCard svg { color: var(--text-mut); }
+.quickCard:hover svg { color: var(--py-rojo); }
+
+/* Tables and lists */
+.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 24px; }
+.sectionTitle { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
+.table th { color: var(--text-mut); font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+.table td { color: var(--text); }
+
+.badge {
+  display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
+}
+.badgePagado { background: rgba(18,128,59, 0.15); color: var(--br-verde); }
+.badgePendiente { background: rgba(242,196,12, 0.15); color: var(--gold); }
+.badgeAdmin { background: rgba(29, 63, 148, 0.14); color: var(--azul); }
+
+.btnSm {
+  padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+  background: var(--br-verde); color: white;
+}
+.btnSm:hover { opacity: 0.9; }
+.btnSmDanger { background: var(--py-rojo); }
+.btnSmGhost { background: var(--bg-elev); color: var(--text); border: 1px solid var(--border); }
+
+.toolbar {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.toolbar h2 { font-size: 22px; font-weight: 700; }
+
+.formGrid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;
+}
+.formGrid label { font-size: 12px; color: var(--text-mut); display: block; margin-bottom: 6px; }
+.formField { display: flex; flex-direction: column; }
+
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.sectionTitle { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+.subTitle { font-size: 14px; font-weight: 600; color: var(--text-mut); margin: 22px 0 12px; }
+.mediaGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+.mediaGrid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+.testiBlock { padding: 16px 0; border-bottom: 1px solid var(--border); }
+.testiBlock:last-child { border-bottom: none; }
+
+/* Afiliados */
+.afilCard { background: var(--bg-2); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+.afilHead { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.afilHead strong { font-size: 15px; }
+.afilEmail { display: block; font-size: 12px; color: var(--text-mut); margin-top: 2px; }
+.nuevoTag { font-size: 10px; font-weight: 800; background: var(--verde); color: #052e1f; padding: 1px 7px; border-radius: 999px; vertical-align: middle; }
+.afilRemove { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #f87171; }
+.afilRemove:hover { color: #ef4444; }
+.afilCode { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 10px 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; font-size: 13px; margin-bottom: 14px; }
+.afilCode b { color: var(--cyan); }
+.afilCode button { display: inline-flex; align-items: center; gap: 6px; color: var(--azul); font-size: 12px; font-weight: 600; }
+.afilStats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; }
+.afilStats > div { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+.afilStats span { display: block; font-size: 11px; color: var(--text-mut); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+.afilStats strong { font-size: 18px; font-family: var(--font-display); }
+.pend { color: var(--oro); }
+
+.rowActions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.rowActions .btnSm { display: inline-flex; align-items: center; gap: 5px; }
+
+/* Pagos */
+.pendBadge { font-size: 12px; font-weight: 700; background: var(--oro); color: #1a1500; padding: 3px 10px; border-radius: 999px; margin-left: 10px; vertical-align: middle; }
+.pagosGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.pagoCard { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 22px; }
+.pagoHead { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+.pagoHead strong { font-size: 15px; }
+.pagoEmail { display: block; font-size: 12px; color: var(--text-mut); }
+.pagoNum { display: block; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 11px; color: var(--cyan); margin-top: 3px; }
+.pagoMonto { font-family: var(--font-display); font-size: 30px; font-weight: 600; color: var(--verde); }
+.pagoFecha { font-size: 12px; color: var(--text-mut); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pagoRefs { display: inline-flex; align-items: center; background: rgba(34,211,238,.12); color: var(--cyan); padding: 2px 9px; border-radius: 999px; font-weight: 600; }
+.cambioCfgRate { font-size: 13px; color: var(--text-mut); }
+.cambioCfgRate strong { color: var(--text); }
+.cambioMonto { display: flex; gap: 20px; margin: 6px 0 4px; }
+.cambioMonto span { display: block; font-size: 11px; color: var(--text-mut); }
+.cambioMonto strong { font-size: 20px; font-family: var(--font-display); }
+.pagoDatos { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; padding: 14px; background: var(--bg-2); border-radius: 12px; }
+.pagoDatos > div { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
+.pagoDatos span { color: var(--text-mut); }
+.pagoDatos strong { text-align: right; }
+.pagoActions { margin-top: 4px; }
+.pagoOk { display: block; margin-top: 12px; font-size: 12px; color: var(--verde); text-align: center; }
+.comprobanteBox { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+
+/* Emails */
+.emailGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+.modoTabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.modoTab { display: inline-flex; align-items: center; gap: 7px; padding: 10px 14px; border-radius: 10px; background: var(--bg-2); border: 1px solid var(--border); color: var(--text-mut); font-size: 13px; font-weight: 600; }
+.modoTab:hover { color: var(--text); }
+.modoActive { background: var(--azul); border-color: var(--azul); color: #fff; }
+.destBox { margin-top: 18px; padding: 14px 16px; background: rgba(59,130,246,.08); border: 1px solid rgba(59,130,246,.25); border-radius: 12px; font-size: 14px; color: var(--text-mut); display: flex; align-items: center; gap: 10px; }
+.destBox strong { color: var(--azul); font-size: 18px; }
+@media (max-width: 900px) { .emailGrid { grid-template-columns: 1fr; } }
+.pagoDelete { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; color: var(--text-mut); }
+.pagoDelete:hover { color: #f87171; }
+
+/* Badge en el menú lateral */
+.navBadge { background: var(--oro); color: #1a1500; font-size: 11px; font-weight: 800; padding: 1px 7px; border-radius: 999px; margin-left: auto; }
+
+.modalOverlay {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; padding: 20px;
+  backdrop-filter: blur(4px);
+}
+.modal {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+  width: 100%; max-width: 720px; max-height: 90vh;
+  display: flex; flex-direction: column;
+}
+.modalHead {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+}
+.modalHead h3 { font-size: 18px; font-weight: 700; }
+.modalHead button {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-mut);
+}
+.modalHead button:hover { background: var(--bg-elev); color: var(--text); }
+.modalBody { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modalFooter {
+  display: flex; gap: 12px; justify-content: flex-end;
+  padding: 16px 24px; border-top: 1px solid var(--border);
+}
+.spin { animation: spinAdmin 1s linear infinite; }
+@keyframes spinAdmin { to { transform: rotate(360deg); } }

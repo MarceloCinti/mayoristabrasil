@@ -1,0 +1,31 @@
+// Profesiones / ocupaciones reales (selección única) — lista abarcativa
+export const PROFESIONES = [
+  'Comerciante / Vendedor/a',
+  'Empresario/a / Emprendedor/a',
+  'Ama de casa',
+  'Estudiante',
+  'Empleado/a',
+  'Profesional independiente',
+  'Funcionario/a público/a',
+  'Docente / Profesor/a',
+  'Enfermero/a',
+  'Médico/a',
+  'Abogado/a',
+  'Contador/a',
+  'Ingeniero/a',
+  'Arquitecto/a',
+  'Diseñador/a',
+  'Peluquero/a / Estilista',
+  'Cosmetólogo/a / Manicura',
+  'Cocinero/a / Gastronomía',
+  'Chofer / Transportista',
+  'Mecánico/a',
+  'Construcción / Albañil',
+  'Agricultor/a / Productor/a',
+  'Policía / Militar',
+  'Jubilado/a',
+  'Desempleado/a',
+  'Otro',
+] as const;
+
+export type Profesion = typeof PROFESIONES[number];

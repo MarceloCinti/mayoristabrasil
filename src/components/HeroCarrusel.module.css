@@ -1,0 +1,88 @@
+.wrap { position: relative; }
+
+/* Las fotos son verticales (1057x1488). Un marco 16:9 como el del video viejo
+   les cortaría la cara y el producto, así que el marco acompaña la foto. */
+.marco {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--bg-2);
+  box-shadow: 0 30px 70px -28px rgba(11, 27, 43, .45);
+  border: 1px solid var(--border);
+}
+
+/* Todas apiladas; sólo la activa queda visible. El cruce es una transición de
+   opacidad, no un reemplazo, para que no haya parpadeo en blanco. */
+.foto {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center 22%;   /* privilegia cara y producto sobre los pies */
+  opacity: 0;
+  transition: opacity .7s ease-in-out;
+}
+.fotoOn { opacity: 1; }
+
+/* ===== Badges de precio ===== */
+/* Fondo siempre oscuro (flotan sobre la foto), por eso el texto va fijo en
+   claro en vez de heredar var(--text). */
+.badge {
+  position: absolute;
+  background: rgba(18, 27, 46, .94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 14px;
+  padding: 12px 18px;
+  display: flex; flex-direction: column;
+  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, .55);
+  animation: floaty 5s ease-in-out infinite;
+  z-index: 2;
+}
+.badgeTop { top: 22px; left: -14px; }
+.badgeBottom { bottom: 28px; right: -14px; animation-delay: 1.2s; }
+
+.badgeLabel {
+  font-size: 11px; color: rgba(255, 255, 255, .62);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.badge strong {
+  font-family: var(--font-display);
+  font-size: 24px; font-weight: 700; color: #fff;
+  /* el `key` cambia con la foto: React remonta el nodo y la animación corre */
+  animation: valorEntra .45s ease-out;
+}
+.badgeVerde { color: #4FCF80 !important; }
+
+@keyframes valorEntra {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ===== Puntitos de posición ===== */
+.puntos {
+  position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 6px; z-index: 2;
+}
+.punto {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255, 255, 255, .45);
+  transition: background .3s, width .3s;
+}
+.puntoOn { background: #fff; width: 18px; border-radius: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .foto { transition: none; }
+  .badge { animation: none; }
+  .badge strong { animation: none; }
+}
+
+@media (max-width: 768px) {
+  .marco { aspect-ratio: 4 / 5; border-radius: 16px; }
+  .badgeTop { left: 6px; top: 12px; }
+  .badgeBottom { right: 6px; bottom: 14px; }
+  .badge { padding: 9px 13px; }
+  .badge strong { font-size: 19px; }
+}

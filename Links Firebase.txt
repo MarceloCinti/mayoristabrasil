@@ -1,0 +1,20 @@
+Inicio del proyecto:
+https://console.firebase.google.com/project/mayorista-brasil/overview
+
+Authentication (usuarios y login):
+https://console.firebase.google.com/project/mayorista-brasil/authentication/users
+
+Firestore (base de datos):
+https://console.firebase.google.com/project/mayorista-brasil/firestore
+
+Reglas de Firestore (donde vas a pegar las reglas nuevas):
+https://console.firebase.google.com/project/mayorista-brasil/firestore/rules
+
+Storage (videos e imágenes):
+https://console.firebase.google.com/project/mayorista-brasil/storage
+
+Reglas de Storage:
+https://console.firebase.google.com/project/mayorista-brasil/storage/rules
+
+Dominios autorizados (login):
+https://console.firebase.google.com/project/mayorista-brasil/authentication/settings

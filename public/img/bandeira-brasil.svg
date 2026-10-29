@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700">
+<defs>
+  <!-- Ondulação do tecido: ruído + deslocamento. Como isto entra via CSS
+       background-image, o navegador rasteriza uma vez só (não custa por quadro). -->
+  <filter id="ondas" x="-12%" y="-12%" width="124%" height="124%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.0055 0.011" numOctaves="3" seed="11" result="ruido"/>
+    <feDisplacementMap in="SourceGraphic" in2="ruido" scale="62" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <!-- Vincos: faixas claras e escuras alternadas, como luz batendo no pano -->
+  <linearGradient id="vincos" x1="0" y1="0" x2="1" y2="0.28">
+    <stop offset="0.00" stop-color="#000" stop-opacity="0.22"/>
+    <stop offset="0.07" stop-color="#fff" stop-opacity="0.20"/>
+    <stop offset="0.15" stop-color="#000" stop-opacity="0.18"/>
+    <stop offset="0.24" stop-color="#fff" stop-opacity="0.16"/>
+    <stop offset="0.33" stop-color="#000" stop-opacity="0.20"/>
+    <stop offset="0.43" stop-color="#fff" stop-opacity="0.22"/>
+    <stop offset="0.52" stop-color="#000" stop-opacity="0.20"/>
+    <stop offset="0.62" stop-color="#fff" stop-opacity="0.18"/>
+    <stop offset="0.71" stop-color="#000" stop-opacity="0.20"/>
+    <stop offset="0.81" stop-color="#fff" stop-opacity="0.14"/>
+    <stop offset="0.90" stop-color="#000" stop-opacity="0.19"/>
+    <stop offset="1.00" stop-color="#000" stop-opacity="0.24"/>
+  </linearGradient>
+  <radialGradient id="brilhoGlobo" cx="0.36" cy="0.30" r="0.85">
+    <stop offset="0" stop-color="#3A63C8"/>
+    <stop offset="1" stop-color="#12276B"/>
+  </radialGradient>
+  <linearGradient id="campoVerde" x1="0" y1="0" x2="0.7" y2="1">
+    <stop offset="0" stop-color="#12803B"/>
+    <stop offset="1" stop-color="#0B5F2B"/>
+  </linearGradient>
+  <linearGradient id="losango" x1="0.1" y1="0" x2="0.9" y2="1">
+    <stop offset="0" stop-color="#F2C40C"/>
+    <stop offset="1" stop-color="#C79E06"/>
+  </linearGradient>
+  <clipPath id="cortaGlobo"><circle cx="500" cy="350" r="175"/></clipPath>
+</defs>
+
+<g filter="url(#ondas)">
+  <rect x="-120" y="-120" width="1240" height="940" fill="url(#campoVerde)"/>
+  <polygon points="500,85 915,350 500,615 85,350" fill="url(#losango)"/>
+  <circle cx="500" cy="350" r="175" fill="url(#brilhoGlobo)"/>
+  <g clip-path="url(#cortaGlobo)">
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(455 255) scale(9)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(520 238) scale(11)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(575 268) scale(7)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(610 300) scale(8)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(430 300) scale(7)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(492 292) scale(6)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(548 318) scale(9)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(600 352) scale(6)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(398 338) scale(8)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(462 345) scale(7)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(530 362) scale(10)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(588 398) scale(7)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(420 392) scale(6)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(470 405) scale(8)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(520 432) scale(9)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(566 452) scale(6)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(610 430) scale(7)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(448 455) scale(7)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(500 478) scale(8)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(380 290) scale(6)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(556 222) scale(6)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(626 382) scale(6)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(404 432) scale(5)" fill="#fff"/>
+    <path d="M0,-1 L0.225,-0.31 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.31 Z" transform="translate(480 215) scale(5)" fill="#fff"/>
+    <path d="M338,398 Q500,528 662,316 L662,356 Q500,568 338,438 Z" fill="#fff"/>
+    <path id="curvaTexto" d="M352,414 Q500,536 650,334" fill="none"/>
+    <text font-family="Georgia,serif" font-size="27" font-weight="700" letter-spacing="2" fill="#0B5F2B">
+      <textPath href="#curvaTexto" startOffset="50%" text-anchor="middle">ORDEM E PROGRESSO</textPath>
+    </text>
+  </g>
+  <rect x="-120" y="-120" width="1240" height="940" fill="url(#vincos)"/>
+</g>
+</svg>

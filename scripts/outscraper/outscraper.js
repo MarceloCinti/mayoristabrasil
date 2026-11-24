@@ -192,10 +192,13 @@ function agruparPorBusca(dados, lote) {
   return lote.map(b => m.get(sem(b.query)));
 }
 
-// Para antes de passar do --usd ou do saldo real da conta
-async function cabe(chave, saldoInicial, teto, proximo) {
+// Para antes de passar do --usd ou do saldo da conta. O saldo do Outscraper
+// atualiza com atraso de vários minutos, então vale o MAIOR entre a queda do
+// saldo e a nossa própria conta (que ignora os 500 grátis — erra para menos).
+async function cabe(chave, saldoInicial, teto, gastoRodada, proximo) {
   const s = await saldo(chave);
-  return (saldoInicial - s) + proximo <= teto && s - proximo > 0.02;
+  const usado = Math.max(gastoRodada, saldoInicial - s);
+  return usado + proximo <= teto && saldoInicial - usado - proximo > 0.02;
 }
 
 // Teto de gasto desta rodada: o menor entre --usd e o saldo da conta
@@ -253,7 +256,7 @@ async function etapaBuscar() {
     const limite = lote[0].limite;
     // Pior caso: todas as buscas do lote devolvem o limite cheio
     const pior = lote.length * limite * PRECO.empresa;
-    if (!(await cabe(chave, saldoInicial, teto, pior))) { console.log(`\n  Parei no teto (${usd(teto)}). Faltam ${pend.length - feitas} buscas.`); break; }
+    if (!(await cabe(chave, saldoInicial, teto, gasto, pior))) { console.log(`\n  Parei no teto (${usd(teto)}). Faltam ${pend.length - feitas} buscas.`); break; }
     const env = await chamar('/maps/search-v3', {
       query: lote.map(b => b.query),
       organizationsPerQueryLimit: limite,
@@ -323,7 +326,7 @@ async function etapaRefrescar() {
   let gasto = 0, achados = 0;
   for (let i = 0; i < alvo.length; i += LOTE) {
     const lote = alvo.slice(i, i + LOTE);
-    if (!(await cabe(chave, saldoInicial, teto, lote.length * PRECO.empresa))) { console.log(`\n  Parei no teto (${usd(teto)}). Faltam ${alvo.length - i}.`); break; }
+    if (!(await cabe(chave, saldoInicial, teto, gasto, lote.length * PRECO.empresa))) { console.log(`\n  Parei no teto (${usd(teto)}). Faltam ${alvo.length - i}.`); break; }
     const env = await chamar('/maps/search-v3', {
       query: lote.map(p => p.gid), organizationsPerQueryLimit: 1, language: 'pt', region: 'BR', async: 'true',
     }, chave);
@@ -533,7 +536,7 @@ async function etapaFotos() {
   let gasto = 0;
   for (let i = 0; i < alvo.length; i += LOTE) {
     const lote = alvo.slice(i, i + LOTE);
-    if (!(await cabe(chave, saldoInicial, teto, lote.length * POR_LUGAR * PRECO.foto))) { console.log(`\n  Parei no teto (${usd(teto)}). Faltam ${alvo.length - i}.`); break; }
+    if (!(await cabe(chave, saldoInicial, teto, gasto, lote.length * POR_LUGAR * PRECO.foto))) { console.log(`\n  Parei no teto (${usd(teto)}). Faltam ${alvo.length - i}.`); break; }
     const env = await chamar('/maps/photos-v3', {
       query: lote.map(x => x.placeId), photosLimit: POR_LUGAR, limit: 1, tag: 'all', language: 'pt', region: 'BR', async: 'true',
     }, chave);

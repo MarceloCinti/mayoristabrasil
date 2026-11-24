@@ -52,6 +52,11 @@ const APLICAR = args.includes('--aplicar');
 const LIMITE = Number((args.find(a => a.startsWith('--limite=')) || '').split('=')[1]) || Infinity;
 const MAX_FOTOS = Number((args.find(a => a.startsWith('--max-fotos=')) || '').split('=')[1]) || 5;
 const ARQ_IDS = (args.find(a => a.startsWith('--ids=')) || '').slice(6);
+// --do-cache: pega as URLs do cache do "refrescar" (outscraper/dados/base) em vez
+// do Firestore. Serve quando as URLs gravadas já expiraram (403) e não dá nem
+// para baixar — as do cache são recentes e ainda respondem.
+const DO_CACHE = args.includes('--do-cache');
+const DIR_CACHE = path.join(__dirname, 'outscraper', 'dados', 'base');
 const CONCORRENCIA = 4;          // downloads simultâneos
 const TAMANHO_MAX = 8 * 1024 * 1024; // 8 MB por foto
 
@@ -120,6 +125,29 @@ async function subir(provId, indice, buf, tipo) {
   return `https://firebasestorage.googleapis.com/v0/b/${BUCKET}/o/${encodeURIComponent(destino)}?alt=media&token=${token}`;
 }
 
+// Lê as fotos frescas que o "refrescar" deixou em dados/base/<docId>.json
+function fotosDoCache() {
+  const m = new Map();
+  if (!fs.existsSync(DIR_CACHE)) return m;
+  for (const f of fs.readdirSync(DIR_CACHE)) {
+    if (!f.endsWith('.json')) continue;
+    let j;
+    try { j = JSON.parse(fs.readFileSync(path.join(DIR_CACHE, f), 'utf8')); } catch { continue; }
+    const l = j && j.lugar;
+    if (!l || !j.docId) continue;
+    const urls = [];
+    if (typeof l.photo === 'string' && l.photo.startsWith('http')) urls.push(l.photo);
+    if (Array.isArray(l.photos_data)) {
+      for (const x of l.photos_data) {
+        const u = typeof x === 'string' ? x : (x && (x.photo_url || x.url));
+        if (typeof u === 'string' && u.startsWith('http')) urls.push(u);
+      }
+    }
+    if (urls.length) m.set(j.docId, [...new Set(urls)].slice(0, MAX_FOTOS));
+  }
+  return m;
+}
+
 // Executa tarefas com limite de simultaneidade
 async function emLotes(itens, n, fn) {
   const saida = [];
@@ -134,6 +162,9 @@ async function emLotes(itens, n, fn) {
   console.log(APLICAR ? 'MODO: aplicando alterações' : 'MODO: simulação (nada será gravado) — use --aplicar para valer');
   console.log('bucket:', BUCKET, '| máx', MAX_FOTOS, 'fotos por proveedor\n');
 
+  const cache = DO_CACHE ? fotosDoCache() : new Map();
+  if (DO_CACHE) console.log('origem: cache do refrescar —', cache.size, 'fornecedores com foto fresca\n');
+
   const snap = await db.collection('proveedores').get();
   const soEstes = ARQ_IDS ? new Set(JSON.parse(fs.readFileSync(ARQ_IDS, 'utf8'))) : null;
   const todos = soEstes ? snap.docs.filter(d => soEstes.has(d.id)) : snap.docs;
@@ -147,11 +178,15 @@ async function emLotes(itens, n, fn) {
   for (const doc of docs) {
     n++;
     const d = doc.data();
-    const fotos = Array.isArray(d.fotos) ? d.fotos.filter(Boolean).slice(0, MAX_FOTOS) : [];
+    const atuais = Array.isArray(d.fotos) ? d.fotos.filter(Boolean) : [];
+    // Quem já tem foto nossa está resolvido: não mexe nem gasta download
+    if (atuais.some(jaNossa)) { jaOk += atuais.filter(jaNossa).length; continue; }
+
+    // Com --do-cache a origem é o cache do refrescar; sem ele, o que está no banco
+    const fotos = DO_CACHE ? (cache.get(doc.id) || []) : atuais.slice(0, MAX_FOTOS);
     if (fotos.length === 0) { semFoto++; continue; }
 
     const pendentes = fotos.filter(u => !jaNossa(u));
-    jaOk += fotos.length - pendentes.length;
     if (pendentes.length === 0) continue;
 
     const resultados = await emLotes(pendentes, CONCORRENCIA, async (url) => {

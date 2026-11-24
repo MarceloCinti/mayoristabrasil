@@ -41,7 +41,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { PLANO, POLOS_ATACADO, buscasDe } = require('./plano');
+const { PLANO, POLOS_ATACADO, POLOS_INDUSTRIAIS, buscasDe } = require('./plano');
 const { CATEGORIAS_LISTA } = require('./categorias-lista');
 
 // ===== Opções =====
@@ -352,7 +352,8 @@ async function etapaRefrescar() {
 // =====================================================================
 const RE_FORNECEDOR = /atacad|distribui|fabric|industri|confec|importad|fornecedor|representac|faccao|malharia|tecelagem|wholesale|manufactur|supplier/;
 const RE_FABRICA = /fabrica|fabricante|industri|confeccao|faccao|malharia|tecelagem|manufactur/;
-const RE_NAO_FORNECEDOR = /^(restaurante|lanchonete|igreja|escola|banco|hospital|hotel|pousada|academia de|farmacia|supermercado|posto de|bar$|padaria$|clinica|salao de beleza|barbearia$|oficina mecanica|estacionamento)/;
+// Tipos do Google que nunca são fornecedor (serviço ou varejo de bairro)
+const RE_NAO_FORNECEDOR = /^(restaurante|lanchonete|igreja|escola|banco|hospital|hotel|pousada|academia de|farmacia|supermercado|posto de|bar$|padaria$|clinica|salao de beleza|barbearia$|oficina|estacionamento|assistencia tecnica|servico de (reparo|conserto|troca)|reparo|conserto|troca de oleo|auto ?center|borracharia|lava.?jato)/;
 
 // Palavras de produto de cada categoria, tiradas dos termos de busca
 const GENERICAS = new Set('atacado atacadista distribuidora distribuidor fabrica fabricante confeccao de da do das dos e para a o em com artigos produtos equipamentos moda loja showroom feira insumos'.split(' '));
@@ -380,10 +381,11 @@ function lerCandidatos(cats) {
       { lugar: b.lugar, cat: b.cat, relev: 0, polo: '', fabrica: RE_FABRICA.test(textoDo(b.lugar)), idBase: b.docId });
   }
   // 2) Resultados das buscas
+  const reserva = new Map();
   for (const f of fs.readdirSync(DIR_BUSCAS)) {
     const b = lerJSON(path.join(DIR_BUSCAS, f), null);
     if (!b || !ids.has(b.cat)) continue;
-    const polo = POLOS_ATACADO.includes(b.polo);
+    const polo = POLOS_ATACADO.includes(b.polo) || POLOS_INDUSTRIAIS.includes(b.polo);
     for (const l of b.lugares || []) {
       if (!l.name) continue;
       if (l.business_status && l.business_status !== 'OPERATIONAL') continue;
@@ -391,16 +393,33 @@ function lerCandidatos(cats) {
       const atual = porLugar.get(chave);
       if (atual && atual.idBase) continue;
       const txt = textoDo(l);
-      const tipo = sem(l.type || l.category || '');
-      // Fora dos polos atacadistas, só entra quem se declara fornecedor
-      if (!RE_FORNECEDOR.test(txt) && (!polo || RE_NAO_FORNECEDOR.test(tipo))) continue;
+      const fornecedor = RE_FORNECEDOR.test(txt);
+      if (!fornecedor && RE_NAO_FORNECEDOR.test(sem(l.type || l.category || ''))) continue;
       const relev = palavrasCat[b.cat].filter(w => txt.includes(w)).length;
+      const cand = { lugar: l, cat: b.cat, relev, polo: b.polo, fabrica: RE_FABRICA.test(txt) };
+      // Fora dos polos, quem não se declara fornecedor fica na reserva
+      if (!fornecedor && !polo) {
+        if (relev > 0 && (!reserva.has(chave) || relev > reserva.get(chave).relev)) reserva.set(chave, cand);
+        continue;
+      }
       // O mesmo lugar aparece em várias categorias: fica onde combina mais
-      if (!atual || relev > atual.relev) porLugar.set(chave, { lugar: l, cat: b.cat, relev, polo: b.polo, fabrica: RE_FABRICA.test(txt) });
+      if (!atual || relev > atual.relev) porLugar.set(chave, cand);
     }
+  }
+  // 3) Nenhuma categoria fica quase vazia: completa até MIN_POR_CAT com os
+  //    melhores da reserva (vendem o produto, só não dizem "atacado")
+  const conta = {};
+  for (const c of porLugar.values()) conta[c.cat] = (conta[c.cat] || 0) + 1;
+  const ordem = [...reserva.entries()].filter(([k]) => !porLugar.has(k))
+    .sort((a, b) => b[1].relev - a[1].relev || Number(b[1].lugar.reviews || 0) - Number(a[1].lugar.reviews || 0));
+  for (const [k, c] of ordem) {
+    if ((conta[c.cat] || 0) >= MIN_POR_CAT) continue;
+    porLugar.set(k, c);
+    conta[c.cat] = (conta[c.cat] || 0) + 1;
   }
   return [...porLugar.values()];
 }
+const MIN_POR_CAT = 8;
 
 // =====================================================================
 // REDES (grátis): Instagram / Facebook / WhatsApp do site de cada um

@@ -35,6 +35,18 @@ const POLOS_ATACADO = [
   'Moda Center Santa Cruz, Santa Cruz do Capibaribe, PE',
 ];
 
+// Cidades que SÃO o polo industrial do segmento: lá quase todo cadastro é
+// fábrica ou ponta de fábrica, mesmo que no Google apareça como "Moveleiro"
+// ou "Loja de cama, mesa e banho". Também são aceitas sem a palavra "atacado".
+const POLOS_INDUSTRIAIS = [
+  'Toritama, PE', 'Santa Cruz do Capibaribe, PE', 'Caruaru, PE', 'Cianorte, PR', 'Terra Roxa, PR',
+  'Franca, SP', 'Birigui, SP', 'Jaú, SP', 'Nova Serrana, MG', 'Novo Hamburgo, RS', 'Apucarana, PR',
+  'Limeira, SP', 'Guaporé, RS', 'Juazeiro do Norte, CE', 'Nova Friburgo, RJ', 'Juruaia, MG',
+  'Ibitinga, SP', 'Brusque, SC', 'Blumenau, SC', 'Americana, SP', 'Jaraguá do Sul, SC',
+  'Santa Gertrudes, SP', 'Criciúma, SC', 'Ubá, MG', 'Bento Gonçalves, RS', 'Arapongas, PR',
+  'São Bento do Sul, SC', 'Holambra, SP', 'Cabo Frio, RJ',
+];
+
 const POLOS_PADRAO = ['São Paulo, SP', 'Curitiba, PR', 'Cascavel, PR', 'Foz do Iguaçu, PR'];
 const POLOS_AGRO = ['Cascavel, PR', 'Toledo, PR', 'Maringá, PR', 'Dourados, MS', 'Campo Grande, MS', 'Ribeirão Preto, SP'];
 const POLOS_MOVEIS = ['Ubá, MG', 'Bento Gonçalves, RS', 'Arapongas, PR', 'São Bento do Sul, SC', 'São Paulo, SP'];
@@ -289,4 +301,4 @@ function buscasDe(catId, { maxTermos = Infinity, maxPolos = Infinity } = {}) {
   return out;
 }
 
-module.exports = { PLANO, POLOS_PADRAO, POLOS_ATACADO, buscasDe };
+module.exports = { PLANO, POLOS_PADRAO, POLOS_ATACADO, POLOS_INDUSTRIAIS, buscasDe };

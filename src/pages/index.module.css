@@ -226,6 +226,12 @@
 .demoWrap { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; }
 .videoSlot { width: 100%; }
 .tourVideo { width: 100%; aspect-ratio: 16/9; border-radius: 16px; border: 1px solid var(--border-strong); background: #000; display: block; object-fit: cover; }
+.tourVideoVert { width: 100%; max-width: 360px; margin: 0 auto; aspect-ratio: 9/16; border-radius: 18px; border: 1px solid var(--border-strong); background: #000; object-fit: cover; }
+.soloMob { display: none; }
+@media (max-width: 640px) {
+  .soloDesk { display: none; }
+  .soloMob { display: block; }
+}
 .proofImg { width: 100%; aspect-ratio: 9/16; object-fit: cover; border-radius: 12px; border: 1px solid var(--border); }
 
 /* ===== IMG SLOTS ===== */

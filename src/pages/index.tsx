@@ -307,7 +307,14 @@ export default function Landing() {
                 <div className={styles.videoSlot}>
                   {config.videoTour
                     ? <video src={config.videoTour} className={styles.tourVideo} controls playsInline preload="metadata" />
-                    : <ImgSlot label="Video de presentación (tour de la plataforma)" ratio="16/9" play />}
+                    : <>
+                        {/* Video de presentación: 16:9 en computadora, 9:16 en celular.
+                            Archivos en /public/video (generados con música propia). */}
+                        <video src="/video/mayorista-16x9.mp4" poster="/video/mayorista-16x9.jpg"
+                          className={`${styles.tourVideo} ${styles.soloDesk}`} controls playsInline preload="none" />
+                        <video src="/video/mayorista-9x16.mp4" poster="/video/mayorista-9x16.jpg"
+                          className={`${styles.tourVideoVert} ${styles.soloMob}`} controls playsInline preload="none" />
+                      </>}
                 </div>
               </Reveal>
             </div>

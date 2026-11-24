@@ -6,43 +6,41 @@
  * sociais lendo o site de cada um, escolhe os melhores (prioridade para quem
  * tem foto, Instagram, Facebook e WhatsApp) e grava direto no Firestore.
  *
- * Etapas — rode nesta ordem. Só "buscar" e "fotos" gastam créditos do
- * Outscraper, e só até o --orcamento que você passar.
+ * Etapas — rode nesta ordem. Só "buscar", "refrescar" e "fotos" gastam
+ * créditos, e nunca mais que --usd nem mais que o SALDO da conta (a conta
+ * aceita passar do saldo e cobra no cartão depois; o script não deixa).
  *
- *   node scripts/outscraper/outscraper.js plano    [filtro]
- *        Mostra quantas buscas existem e quanto custariam. Não chama a API.
+ *   plano      [filtro]               Quantas buscas e quanto custariam. Não chama a API.
+ *   buscar     [filtro] --usd=5       Busca no Google Maps. Busca já feita nunca é paga de novo.
+ *   recuperar  [filtro]               GRÁTIS. Se "buscar" caiu no meio, salva o que já foi pago
+ *                                     (lê os pedidos antigos no Outscraper). Mesmas opções de volume.
+ *   refrescar  [filtro] --usd=3.5 [--max=N]  Fornecedores QUE JÁ ESTÃO na base: consulta cada um pelo
+ *                                     id do Google (1 registro cada) para trazer foto nova e
+ *                                     dados atuais. Serve para consertar as fotos expiradas.
+ *   redes      [filtro]               GRÁTIS. Abre o site de cada um e pega Instagram,
+ *                                     Facebook e WhatsApp.
+ *   fotos      [filtro] --usd=2 [--por-lugar=4]   Fotos extras dos escolhidos (opcional).
+ *   revisar    [filtro]               Escolhe, pontua e cruza com a base. Relatório e
+ *                                     planilha em dados/revisao.tsv. Não grava nada.
+ *   gravar     [filtro] [--aplicar]   Grava (sem --aplicar é simulação), atualiza os números
+ *                                     da landing e re-hospeda as fotos no nosso Storage na hora
+ *                                     — os links de foto do Google expiram em poucos dias.
  *
- *   node scripts/outscraper/outscraper.js buscar   [filtro] --orcamento=450
- *        Faz as buscas no Google Maps. Para antes de passar do orçamento
- *        (em número de empresas). Busca já feita nunca é paga de novo.
+ *   node scripts/outscraper/outscraper.js <etapa> [opções]
  *
- *   node scripts/outscraper/outscraper.js redes    [filtro]
- *        GRÁTIS. Abre o site de cada candidato e pega Instagram, Facebook e
- *        WhatsApp que estão lá.
+ * Filtro:  --cat=jeans,tenis  |  --grupo=Moda  |  --vazias (só categorias sem nenhum
+ *          fornecedor; vale para plano e buscar)
+ * Volume:  --por-busca=40            empresas por busca (padrão 40)
+ *          --por-categoria=20        OU: total por categoria, dividido entre as buscas dela
+ *          --max-termos=2 --max-polos=1   modo econômico: só os primeiros termos/polos
+ *                                     do plano (os melhores — a lista está em ordem)
  *
- *   node scripts/outscraper/outscraper.js fotos    [filtro] --orcamento=2000 [--por-lugar=4]
- *        Fotos extras de cada fornecedor escolhido (em número de fotos).
- *
- *   node scripts/outscraper/outscraper.js revisar  [filtro]
- *        Escolhe, pontua e cruza com a base atual. Gera relatório e planilha
- *        (dados/revisao.tsv) para conferir. Não grava nada.
- *
- *   node scripts/outscraper/outscraper.js gravar   [filtro] [--aplicar]
- *        Grava no Firestore (sem --aplicar é simulação), atualiza os números da
- *        landing e re-hospeda as fotos no Storage do projeto na mesma hora —
- *        os links de foto do Google expiram em poucos dias.
- *
- *   Filtro (opcional, vale para todas): --cat=jeans,tenis   ou   --grupo=Moda
- *   --por-busca=40   empresas por busca (padrão 40)
- *
- * Precisa de OUTSCRAPER_API_KEY no .env.local (só para buscar e fotos) e de
- * scripts/serviceAccount.json (para revisar e gravar).
+ * Precisa de OUTSCRAPER_API_KEY no .env.local e de scripts/serviceAccount.json.
  * Tudo que vem da API fica em scripts/outscraper/dados/ (fora do git).
  */
 
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 const { PLANO, POLOS_ATACADO, buscasDe } = require('./plano');
 const { CATEGORIAS_LISTA } = require('./categorias-lista');
 
@@ -55,21 +53,25 @@ const opt = (nome, padrao) => {
 const flag = (nome) => ARGS.includes(`--${nome}`);
 
 const POR_BUSCA = Number(opt('por-busca', 40));
-const ORCAMENTO = Number(opt('orcamento', 0));
+const POR_CATEGORIA = Number(opt('por-categoria', 0));
+const MAX_TERMOS = Number(opt('max-termos', Infinity));
+const MAX_POLOS = Number(opt('max-polos', Infinity));
+const USD = Number(opt('usd', 0));
 const APLICAR = flag('aplicar');
 
 const RAIZ = path.join(__dirname, '..', '..');
 const DADOS = path.join(__dirname, 'dados');
 const DIR_BUSCAS = path.join(DADOS, 'buscas');
+const DIR_BASE = path.join(DADOS, 'base');
 const DIR_FOTOS = path.join(DADOS, 'fotos');
 const ARQ_REDES = path.join(DADOS, 'redes.json');
 const ARQ_GASTO = path.join(DADOS, 'gasto.json');
 const ARQ_SELECAO = path.join(DADOS, 'selecionados.json');
-for (const d of [DADOS, DIR_BUSCAS, DIR_FOTOS]) fs.mkdirSync(d, { recursive: true });
+for (const d of [DADOS, DIR_BUSCAS, DIR_BASE, DIR_FOTOS]) fs.mkdirSync(d, { recursive: true });
 
-// Preços públicos do Outscraper (outscraper.com/pricing, nov/2026), em US$ por 1.000.
-// Cada serviço tem 500 grátis a cada 30 dias.
-const PRECO = { empresas: 3, fotos: 2, gratis: 500 };
+// Preços públicos do Outscraper (outscraper.com/pricing, nov/2026), em US$ por registro.
+// Os 500 grátis do mês não entram na conta: se houver, sobra saldo.
+const PRECO = { empresa: 3 / 1000, foto: 2 / 1000 };
 
 const API = 'https://api.app.outscraper.com';
 
@@ -77,7 +79,6 @@ const API = 'https://api.app.outscraper.com';
 const lerJSON = (arq, padrao) => { try { return JSON.parse(fs.readFileSync(arq, 'utf8')); } catch { return padrao; } };
 const gravarJSON = (arq, obj) => fs.writeFileSync(arq, JSON.stringify(obj, null, 1));
 const sem = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-const hash = (s) => crypto.createHash('sha1').update(s).digest('hex').slice(0, 12);
 const slug = (s) => sem(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
 const esperar = (ms) => new Promise(r => setTimeout(r, ms));
 const usd = (n) => 'US$ ' + n.toFixed(2);
@@ -86,7 +87,7 @@ function lerEnv() {
   const env = {};
   try {
     for (const linha of fs.readFileSync(path.join(RAIZ, '.env.local'), 'utf8').split(/\r?\n/)) {
-      const m = linha.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
+      const m = linha.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/);
       if (m) env[m[1]] = m[2].replace(/^["']|["']$/g, '');
     }
   } catch { /* sem .env.local */ }
@@ -97,7 +98,7 @@ function chaveApi() {
   const k = process.env.OUTSCRAPER_API_KEY || lerEnv().OUTSCRAPER_API_KEY;
   if (!k) {
     console.error('\n  Falta OUTSCRAPER_API_KEY no .env.local');
-    console.error('  app.outscraper.com → Profile → API Token. Cole uma linha assim no .env.local:');
+    console.error('  app.outscraper.cloud → API & Integrações → Chave de API. Cole assim no .env.local:');
     console.error('    OUTSCRAPER_API_KEY=sua_chave_aqui\n');
     process.exit(1);
   }
@@ -111,27 +112,37 @@ function categoriasFiltradas() {
   let lista = CATEGORIAS_LISTA;
   if (cats.length) lista = lista.filter(c => cats.includes(c.id));
   if (grupo) lista = lista.filter(c => sem(c.grupo).startsWith(grupo));
-  const semPlano = lista.filter(c => !PLANO[c.id]);
-  if (semPlano.length) console.warn('  aviso: categorias sem plano de busca:', semPlano.map(c => c.id).join(', '));
   return lista.filter(c => PLANO[c.id]);
 }
 
-const arqBusca = (b) => path.join(DIR_BUSCAS, `${b.cat}--${slug(b.query)}--${POR_BUSCA}.json`);
+// Para decidir o que COMPRAR (plano/buscar): --vazias tira as que já têm fornecedor
+async function categoriasParaComprar() {
+  const lista = categoriasFiltradas();
+  if (!flag('vazias')) return lista;
+  const snap = await firestore().collection('proveedores').select('categoria').get();
+  const com = new Set(snap.docs.map(d => d.get('categoria')));
+  return lista.filter(c => !com.has(c.id));
+}
+
+// Buscas de uma categoria, já com o limite de empresas de cada uma
+function buscasDaCat(id) {
+  const bs = buscasDe(id, { maxTermos: MAX_TERMOS, maxPolos: MAX_POLOS });
+  const limite = POR_CATEGORIA ? Math.max(5, Math.ceil(POR_CATEGORIA / bs.length)) : POR_BUSCA;
+  return bs.map(b => ({ ...b, limite }));
+}
+
+const arqBusca = (b) => path.join(DIR_BUSCAS, `${b.cat}--${slug(b.query)}--${b.limite}.json`);
 // Busca já feita com este limite ou com um limite maior serve
 function buscaEmCache(b) {
   const prefixo = `${b.cat}--${slug(b.query)}--`;
-  const arqs = fs.readdirSync(DIR_BUSCAS).filter(f => f.startsWith(prefixo));
-  for (const f of arqs) {
-    const lim = Number(f.slice(prefixo.length).replace('.json', ''));
-    if (lim >= POR_BUSCA) return path.join(DIR_BUSCAS, f);
-  }
-  return null;
+  return fs.readdirSync(DIR_BUSCAS).some(f => f.startsWith(prefixo) && Number(f.slice(prefixo.length).replace('.json', '')) >= b.limite);
 }
 
-function registrarGasto(tipo, qtd) {
-  const g = lerJSON(ARQ_GASTO, { empresas: 0, fotos: 0, historico: [] });
+function registrarGasto(tipo, qtd, custo) {
+  const g = lerJSON(ARQ_GASTO, { usd: 0, historico: [] });
+  g.usd = (g.usd || 0) + custo;
   g[tipo] = (g[tipo] || 0) + qtd;
-  g.historico.push({ tipo, qtd, em: new Date().toISOString() });
+  g.historico.push({ tipo, qtd, usd: +custo.toFixed(4), em: new Date().toISOString() });
   gravarJSON(ARQ_GASTO, g);
 }
 
@@ -160,72 +171,177 @@ async function aguardar(id, chave) {
       return r.data || [];
     }
     if (Date.now() - inicio > 20 * 60 * 1000) throw new Error(`pedido ${id} demorou mais de 20 min`);
-    await esperar(6000);
+    await esperar(5000);
   }
+}
+
+const saldo = async (chave) => Number((await chamar('/profile/balance', {}, chave)).balance);
+
+// Separa a resposta por busca. Sem dropDuplicates a API devolve uma lista por
+// busca; com ele, uma lista única onde cada lugar diz de qual busca veio.
+function agruparPorBusca(dados, lote) {
+  if (dados.every(x => Array.isArray(x))) return lote.map((b, j) => (dados[j] || []).filter(Boolean));
+  const m = new Map(lote.map(b => [sem(b.query), []]));
+  let orfaos = 0;
+  for (const l of dados.flat()) {
+    if (!l) continue;
+    const lista = m.get(sem(l.query));
+    if (lista) lista.push(l); else orfaos++;
+  }
+  if (orfaos) console.warn(`  aviso: ${orfaos} lugares sem busca correspondente`);
+  return lote.map(b => m.get(sem(b.query)));
+}
+
+// Para antes de passar do --usd ou do saldo real da conta
+async function cabe(chave, saldoInicial, teto, proximo) {
+  const s = await saldo(chave);
+  return (saldoInicial - s) + proximo <= teto && s - proximo > 0.02;
+}
+
+// Teto de gasto desta rodada: o menor entre --usd e o saldo da conta
+async function tetoUsd(chave) {
+  if (!USD) { console.error('\n  Diga quanto pode gastar nesta rodada: --usd=5\n'); process.exit(1); }
+  const s = await saldo(chave);
+  const teto = Math.min(USD, s - 0.02);
+  console.log(`  saldo da conta ${usd(s)} · teto desta rodada ${usd(Math.max(0, teto))}`);
+  if (teto <= 0) { console.log('\n  Sem saldo. Nada feito.\n'); process.exit(0); }
+  return { teto, saldoInicial: s };
 }
 
 // =====================================================================
 // PLANO
 // =====================================================================
-function etapaPlano() {
-  const cats = categoriasFiltradas();
-  let total = 0, novas = 0;
-  console.log(`\n=== PLANO (${POR_BUSCA} empresas por busca) ===\n`);
+async function etapaPlano() {
+  const cats = await categoriasParaComprar();
+  let total = 0, pend = 0, maxEmpresas = 0;
   const porGrupo = {};
   for (const c of cats) {
-    const bs = buscasDe(c.id);
-    const pend = bs.filter(b => !buscaEmCache(b));
-    total += bs.length; novas += pend.length;
-    const g = porGrupo[c.grupo] = porGrupo[c.grupo] || { cats: 0, buscas: 0, pend: 0 };
-    g.cats++; g.buscas += bs.length; g.pend += pend.length;
+    const bs = buscasDaCat(c.id);
+    const p = bs.filter(b => !buscaEmCache(b));
+    total += bs.length; pend += p.length;
+    maxEmpresas += p.reduce((s, b) => s + b.limite, 0);
+    const g = porGrupo[c.grupo] = porGrupo[c.grupo] || { cats: 0, buscas: 0, emp: 0 };
+    g.cats++; g.buscas += p.length; g.emp += p.reduce((s, b) => s + b.limite, 0);
   }
+  console.log('\n=== PLANO ===\n');
   for (const [g, v] of Object.entries(porGrupo)) {
-    console.log(`  ${g.padEnd(22)} ${String(v.cats).padStart(3)} categorias  ${String(v.buscas).padStart(4)} buscas  (${v.pend} ainda não feitas)`);
+    console.log(`  ${g.padEnd(22)} ${String(v.cats).padStart(3)} categorias  ${String(v.buscas).padStart(4)} buscas  até ${String(v.emp).padStart(5)} empresas`);
   }
-  const maxEmpresas = novas * POR_BUSCA;
-  const custo = Math.max(0, maxEmpresas - PRECO.gratis) * PRECO.empresas / 1000;
-  console.log(`\n  categorias: ${cats.length}   buscas: ${total}   ainda não feitas: ${novas}`);
-  console.log(`  no máximo ${maxEmpresas.toLocaleString('pt-BR')} empresas → até ${usd(custo)} (os 500 grátis do mês já descontados)`);
-  console.log('  Na prática sai menos: busca de nicho devolve menos que o limite e repetidas não são cobradas.\n');
+  console.log(`\n  categorias: ${cats.length}   buscas: ${total} (${pend} ainda não feitas)`);
+  console.log(`  no máximo ${maxEmpresas.toLocaleString('pt-BR')} empresas → até ${usd(maxEmpresas * PRECO.empresa)}\n`);
 }
 
 // =====================================================================
 // BUSCAR
 // =====================================================================
 async function etapaBuscar() {
-  if (!ORCAMENTO) { console.error('\n  Diga o orçamento em empresas: --orcamento=450 (500 por mês são grátis)\n'); process.exit(1); }
   const chave = chaveApi();
-  const pend = categoriasFiltradas().flatMap(c => buscasDe(c.id)).filter(b => !buscaEmCache(b));
-  console.log(`\n=== BUSCAR === ${pend.length} buscas pendentes · orçamento ${ORCAMENTO} empresas · ${POR_BUSCA} por busca\n`);
+  const pend = (await categoriasParaComprar()).flatMap(c => buscasDaCat(c.id)).filter(b => !buscaEmCache(b));
+  console.log(`\n=== BUSCAR === ${pend.length} buscas pendentes`);
+  const { teto, saldoInicial } = await tetoUsd(chave);
 
-  const LOTE = 10; // buscas por pedido
-  let gastas = 0;
-  for (let i = 0; i < pend.length; i += LOTE) {
-    const lote = pend.slice(i, i + LOTE);
-    if (gastas + lote.length * POR_BUSCA > ORCAMENTO) {
-      console.log(`\n  Parei para não passar do orçamento (${gastas} usadas de ${ORCAMENTO}). Faltam ${pend.length - i} buscas.`);
-      break;
-    }
+  // O limite de empresas vale para o pedido inteiro, então cada lote só junta
+  // buscas com o MESMO limite — misturar faria pagar 20 onde bastavam 10.
+  const LOTE = 15;
+  const lotes = [];
+  const porLimite = {};
+  pend.forEach(b => (porLimite[b.limite] = porLimite[b.limite] || []).push(b));
+  for (const grupo of Object.values(porLimite)) for (let i = 0; i < grupo.length; i += LOTE) lotes.push(grupo.slice(i, i + LOTE));
+
+  let gasto = 0, recebidas = 0, feitas = 0;
+  for (const lote of lotes) {
+    const limite = lote[0].limite;
+    // Pior caso: todas as buscas do lote devolvem o limite cheio
+    const pior = lote.length * limite * PRECO.empresa;
+    if (!(await cabe(chave, saldoInicial, teto, pior))) { console.log(`\n  Parei no teto (${usd(teto)}). Faltam ${pend.length - feitas} buscas.`); break; }
     const env = await chamar('/maps/search-v3', {
       query: lote.map(b => b.query),
-      organizationsPerQueryLimit: POR_BUSCA,
-      language: 'pt',
-      region: 'BR',
-      dropDuplicates: 'true',
-      async: 'true',
+      organizationsPerQueryLimit: limite,
+      language: 'pt', region: 'BR', dropDuplicates: 'true', async: 'true',
     }, chave);
     const dados = await aguardar(env.id, chave);
     let n = 0;
-    lote.forEach((b, j) => {
-      const lugares = (Array.isArray(dados[j]) ? dados[j] : []).filter(Boolean);
+    agruparPorBusca(dados, lote).forEach((lugares, j) => {
       n += lugares.length;
-      gravarJSON(arqBusca(b), { ...b, limite: POR_BUSCA, em: new Date().toISOString(), lugares });
+      gravarJSON(arqBusca(lote[j]), { ...lote[j], em: new Date().toISOString(), pedido: env.id, lugares });
     });
-    gastas += n;
-    registrarGasto('empresas', n);
-    console.log(`  ${String(i + lote.length).padStart(4)}/${pend.length}  +${n} empresas  (total ${gastas})  ${lote[0].cat}…`);
+    feitas += lote.length;
+    gasto += n * PRECO.empresa; recebidas += n;
+    registrarGasto('empresas', n, n * PRECO.empresa);
+    console.log(`  ${String(feitas).padStart(4)}/${pend.length}  +${n} empresas  (${usd(gasto)})  ${lote[0].cat}…`);
   }
-  console.log(`\n  Empresas recebidas nesta rodada: ${gastas}. Próximo passo: redes\n`);
+  console.log(`\n  Recebidas nesta rodada: ${recebidas} empresas ≈ ${usd(gasto)}. Saldo agora: ${usd(await saldo(chave))}\n`);
+}
+
+// =====================================================================
+// RECUPERAR: resultados já pagos que não chegaram a ser salvos (o script caiu
+// no meio, por exemplo). Ler pedidos antigos no Outscraper não é cobrado.
+// Use as mesmas opções de volume da rodada de "buscar".
+// =====================================================================
+async function etapaRecuperar() {
+  const chave = chaveApi();
+  const porQuery = new Map(categoriasFiltradas().flatMap(c => buscasDaCat(c.id)).map(b => [sem(b.query), b]));
+  const lista = await chamar('/requests', { type: 'finished' }, chave);
+  let salvas = 0;
+  for (const p of lista.items || []) {
+    const r = await chamar(`/requests/${p.id}`, {}, chave);
+    const grupos = new Map();
+    for (const l of (r.data || []).flat().filter(Boolean)) {
+      const b = porQuery.get(sem(l.query));
+      if (b) (grupos.get(b) || grupos.set(b, []).get(b)).push(l);
+    }
+    for (const [b, lugares] of grupos) {
+      if (lerJSON(arqBusca(b), { lugares: [] }).lugares.length) continue;
+      gravarJSON(arqBusca(b), { ...b, em: new Date().toISOString(), pedido: p.id, lugares });
+      salvas++;
+    }
+  }
+  console.log(`\n=== RECUPERAR === ${lista.items?.length || 0} pedidos lidos · ${salvas} buscas recuperadas\n`);
+}
+
+// =====================================================================
+// REFRESCAR: fornecedores que já estão na base, consultados um a um
+// =====================================================================
+const googleIdDoLink = (u) => (String(u || '').match(/(0x[0-9a-f]+:0x[0-9a-f]+)/i) || [])[1] || '';
+const nossa = (u) => String(u).includes('firebasestorage.googleapis.com');
+
+async function etapaRefrescar() {
+  const chave = chaveApi();
+  const ids = new Set(categoriasFiltradas().map(c => c.id));
+  const snap = await firestore().collection('proveedores').get();
+  // Só quem não tem nenhuma foto nossa (as do Google expiram) e ainda não foi consultado
+  const alvo = snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(p => ids.has(p.categoria) && !(p.fotos || []).some(nossa))
+    .map(p => ({ id: p.id, cat: p.categoria, gid: p.googleId || googleIdDoLink(p.googleMaps) }))
+    .filter(p => p.gid && !fs.existsSync(path.join(DIR_BASE, p.id + '.json')))
+    .slice(0, Number(opt('max', Infinity)));
+  console.log(`\n=== REFRESCAR === ${alvo.length} fornecedores da base para consultar`);
+  const { teto, saldoInicial } = await tetoUsd(chave);
+
+  const LOTE = 50;
+  let gasto = 0, achados = 0;
+  for (let i = 0; i < alvo.length; i += LOTE) {
+    const lote = alvo.slice(i, i + LOTE);
+    if (!(await cabe(chave, saldoInicial, teto, lote.length * PRECO.empresa))) { console.log(`\n  Parei no teto (${usd(teto)}). Faltam ${alvo.length - i}.`); break; }
+    const env = await chamar('/maps/search-v3', {
+      query: lote.map(p => p.gid), organizationsPerQueryLimit: 1, language: 'pt', region: 'BR', async: 'true',
+    }, chave);
+    const dados = await aguardar(env.id, chave);
+    let n = 0;
+    lote.forEach((p, j) => {
+      const res = (Array.isArray(dados[j]) ? dados[j] : [dados[j]]).filter(Boolean);
+      n += res.length;
+      // Confere que voltou o MESMO lugar
+      const lugar = res.find(l => l.google_id === p.gid) || null;
+      if (lugar) achados++;
+      gravarJSON(path.join(DIR_BASE, p.id + '.json'), { docId: p.id, cat: p.cat, gid: p.gid, lugar, em: new Date().toISOString() });
+    });
+    gasto += n * PRECO.empresa;
+    registrarGasto('refrescar', n, n * PRECO.empresa);
+    console.log(`  ${String(i + lote.length).padStart(4)}/${alvo.length}  achados ${achados}  (${usd(gasto)})`);
+  }
+  console.log(`\n  Achados: ${achados}. Saldo agora: ${usd(await saldo(chave))}\n`);
 }
 
 // =====================================================================
@@ -253,21 +369,29 @@ function textoDo(l) {
 function lerCandidatos(cats) {
   const ids = new Set(cats.map(c => c.id));
   const porLugar = new Map();
+  // 1) Os que já estão na base (refrescar): entram sem filtro, para atualizar
+  for (const f of fs.readdirSync(DIR_BASE)) {
+    const b = lerJSON(path.join(DIR_BASE, f), null);
+    if (!b || !b.lugar || !ids.has(b.cat)) continue;
+    porLugar.set(b.lugar.google_id || 'base:' + b.docId,
+      { lugar: b.lugar, cat: b.cat, relev: 0, polo: '', fabrica: RE_FABRICA.test(textoDo(b.lugar)), idBase: b.docId });
+  }
+  // 2) Resultados das buscas
   for (const f of fs.readdirSync(DIR_BUSCAS)) {
     const b = lerJSON(path.join(DIR_BUSCAS, f), null);
     if (!b || !ids.has(b.cat)) continue;
     const polo = POLOS_ATACADO.includes(b.polo);
     for (const l of b.lugares || []) {
-      const chave = l.google_id || l.place_id || sem(l.name) + '|' + (l.phone || '');
       if (!l.name) continue;
       if (l.business_status && l.business_status !== 'OPERATIONAL') continue;
+      const chave = l.google_id || l.place_id || sem(l.name) + '|' + (l.phone || '');
+      const atual = porLugar.get(chave);
+      if (atual && atual.idBase) continue;
       const txt = textoDo(l);
       const tipo = sem(l.type || l.category || '');
-      const fornecedor = RE_FORNECEDOR.test(txt);
       // Fora dos polos atacadistas, só entra quem se declara fornecedor
-      if (!fornecedor && (!polo || RE_NAO_FORNECEDOR.test(tipo))) continue;
+      if (!RE_FORNECEDOR.test(txt) && (!polo || RE_NAO_FORNECEDOR.test(tipo))) continue;
       const relev = palavrasCat[b.cat].filter(w => txt.includes(w)).length;
-      const atual = porLugar.get(chave);
       // O mesmo lugar aparece em várias categorias: fica onde combina mais
       if (!atual || relev > atual.relev) porLugar.set(chave, { lugar: l, cat: b.cat, relev, polo: b.polo, fabrica: RE_FABRICA.test(txt) });
     }
@@ -292,7 +416,7 @@ function socialDe(texto) {
   };
 }
 
-// Junta tudo que o próprio Outscraper já trouxe (campos de enriquecimento)
+// Junta o que o próprio Outscraper já trouxe em qualquer campo
 function socialDoLugar(l) {
   const todos = [];
   const varrer = (v) => {
@@ -347,9 +471,8 @@ async function etapaRedes() {
 // TELEFONE / WHATSAPP
 // =====================================================================
 function normTel(t) {
-  let d = String(t || '').replace(/\D/g, '');
+  let d = String(t || '').replace(/\D/g, '').replace(/^0+/, '');
   if (!d) return '';
-  if (d.startsWith('0')) d = d.replace(/^0+/, '');
   if (d.length === 10 || d.length === 11) d = '55' + d;
   return d.length === 12 || d.length === 13 ? d : '';
 }
@@ -366,6 +489,7 @@ function melhorTelefone(l, site) {
 // FORMA DE PAGAMENTO (campo "about" do Google)
 // =====================================================================
 function formasPago(about) {
+  if (typeof about === 'string') { try { about = JSON.parse(about); } catch { return ''; } }
   if (!about || typeof about !== 'object') return '';
   const chaves = [];
   for (const sec of Object.values(about)) if (sec && typeof sec === 'object') for (const [k, v] of Object.entries(sec)) if (v) chaves.push(sem(k));
@@ -380,7 +504,7 @@ function formasPago(about) {
 }
 
 // =====================================================================
-// FOTOS
+// FOTOS EXTRAS (opcional, pago)
 // =====================================================================
 function fotosDe(obj) {
   const urls = [];
@@ -395,7 +519,6 @@ function fotosDe(obj) {
 }
 
 async function etapaFotos() {
-  if (!ORCAMENTO) { console.error('\n  Diga o orçamento em fotos: --orcamento=2000 (500 por mês são grátis)\n'); process.exit(1); }
   const chave = chaveApi();
   const POR_LUGAR = Number(opt('por-lugar', 4));
   const sel = lerJSON(ARQ_SELECAO, null);
@@ -404,12 +527,13 @@ async function etapaFotos() {
   const alvo = sel.itens
     .filter(i => ids.has(i.dados.categoria) && i.placeId && !fs.existsSync(path.join(DIR_FOTOS, i.placeId + '.json')))
     .sort((a, b) => b.puntaje - a.puntaje);
-  console.log(`\n=== FOTOS === ${alvo.length} fornecedores sem fotos extras · ${POR_LUGAR} por fornecedor · orçamento ${ORCAMENTO} fotos\n`);
+  console.log(`\n=== FOTOS === ${alvo.length} fornecedores sem fotos extras · ${POR_LUGAR} por fornecedor`);
+  const { teto, saldoInicial } = await tetoUsd(chave);
   const LOTE = 20;
-  let gastas = 0;
+  let gasto = 0;
   for (let i = 0; i < alvo.length; i += LOTE) {
     const lote = alvo.slice(i, i + LOTE);
-    if (gastas + lote.length * POR_LUGAR > ORCAMENTO) { console.log(`\n  Parei no orçamento (${gastas} fotos). Faltam ${alvo.length - i}.`); break; }
+    if (!(await cabe(chave, saldoInicial, teto, lote.length * POR_LUGAR * PRECO.foto))) { console.log(`\n  Parei no teto (${usd(teto)}). Faltam ${alvo.length - i}.`); break; }
     const env = await chamar('/maps/photos-v3', {
       query: lote.map(x => x.placeId), photosLimit: POR_LUGAR, limit: 1, tag: 'all', language: 'pt', region: 'BR', async: 'true',
     }, chave);
@@ -420,9 +544,9 @@ async function etapaFotos() {
       n += urls.length;
       gravarJSON(path.join(DIR_FOTOS, x.placeId + '.json'), { urls, em: new Date().toISOString() });
     });
-    gastas += n;
-    registrarGasto('fotos', n);
-    console.log(`  ${i + lote.length}/${alvo.length}  +${n} fotos (total ${gastas})`);
+    gasto += n * PRECO.foto;
+    registrarGasto('fotos', n, n * PRECO.foto);
+    console.log(`  ${i + lote.length}/${alvo.length}  +${n} fotos (${usd(gasto)})`);
   }
   console.log('\n  Rode "revisar" de novo para juntar as fotos, depois "gravar".\n');
 }
@@ -430,18 +554,19 @@ async function etapaFotos() {
 // =====================================================================
 // FIRESTORE
 // =====================================================================
+let _db = null;
 function firestore() {
+  if (_db) return _db;
   const CHAVE = path.join(RAIZ, 'scripts', 'serviceAccount.json');
   if (!fs.existsSync(CHAVE)) { console.error('\n  Falta scripts/serviceAccount.json (ver rehospedar-fotos.js)\n'); process.exit(1); }
   const { initializeApp, cert, getApps } = require('firebase-admin/app');
   const { getFirestore } = require('firebase-admin/firestore');
   const app = getApps()[0] || initializeApp({ credential: cert(require(CHAVE)) });
-  const db = getFirestore(app);
-  db.settings({ preferRest: true }); // o gRPC trava em algumas redes Windows
-  return db;
+  _db = getFirestore(app);
+  _db.settings({ preferRest: true }); // o gRPC trava em algumas redes Windows
+  return _db;
 }
 
-const googleIdDoLink = (u) => (String(u || '').match(/(0x[0-9a-f]+:0x[0-9a-f]+)/i) || [])[1] || '';
 const nomeChave = (s) => sem(s).replace(/[^a-z0-9]/g, '');
 
 async function indiceDaBase(db) {
@@ -474,7 +599,9 @@ function montar(c, redes) {
   const facebook = daUrl.facebook || doLugar.facebook || doSite.facebook || '';
   const whatsapp = melhorTelefone(l, { whatsapp: daUrl.whatsapp || doSite.whatsapp || doLugar.whatsapp });
   const extras = l.place_id ? lerJSON(path.join(DIR_FOTOS, l.place_id + '.json'), { urls: [] }).urls : [];
-  const fotos = [...new Set([l.photo, ...extras].filter(Boolean))].slice(0, 6);
+  // O Google entrega a foto principal em 800x500; o mesmo link serve 1200x900 de graça
+  const grande = (u) => String(u).replace(/=w\d+-h\d+-k-no$/, '=w1200-h900-k-no');
+  const fotos = [...new Set([l.photo, ...extras].filter(Boolean).map(grande))].slice(0, 6);
   const reviews = Number(l.reviews || 0), rating = Number(l.rating || 0);
   const tipo = c.fabrica ? 'Fábrica' : /distribui/.test(textoDo(l)) ? 'Distribuidora' : 'Mayorista';
   const cidade = l.city || '';
@@ -527,7 +654,7 @@ async function etapaRevisar() {
   const cats = categoriasFiltradas();
   const redes = lerJSON(ARQ_REDES, {});
   const cands = lerCandidatos(cats);
-  console.log(`\n=== REVISAR === ${cands.length} fornecedores únicos nas buscas já feitas\n`);
+  console.log(`\n=== REVISAR === ${cands.length} fornecedores únicos nos dados já baixados\n`);
   const db = firestore();
   const base = await indiceDaBase(db);
 
@@ -535,6 +662,7 @@ async function etapaRevisar() {
   const vistosTel = new Set();
   for (const c of cands) {
     const it = montar(c, redes);
+    if (c.idBase) { itens.push({ ...it, acao: 'atualizar', id: c.idBase }); continue; }
     if (!it.dados.whatsapp && !it.dados.instagram && !it.dados.catalogo) continue; // sem forma de contato
     const tel = it.dados.whatsapp;
     const existente = base.porGid.get(it.googleId) || (tel && base.porTel.get(tel)) || base.porNome.get(nomeChave(it.dados.nombre));
@@ -549,23 +677,22 @@ async function etapaRevisar() {
 
   // Relatório por categoria
   const atual = {}; for (const p of base.docs.values()) atual[p.categoria] = (atual[p.categoria] || 0) + 1;
-  console.log('  categoria                   hoje  +novos  com IG  com FB  celular  foto  secretos');
+  console.log('  categoria                   hoje  +novos  atualiz  com IG  com FB  celular  foto  secretos');
   let tn = 0;
-  const fracas = [];
+  const vazias = [];
   for (const cat of cats) {
     const its = itens.filter(i => i.dados.categoria === cat.id);
     const nov = its.filter(i => i.acao === 'novo');
     tn += nov.length;
-    const final = (atual[cat.id] || 0) + nov.length;
-    if (final < 25) fracas.push(`${cat.id} (${final})`);
-    if (!its.length && !atual[cat.id]) continue;
+    if ((atual[cat.id] || 0) + nov.length === 0) vazias.push(cat.id);
+    if (!its.length) continue;
     const q = (f) => String(its.filter(f).length).padStart(6);
-    console.log(`  ${cat.id.padEnd(26)} ${String(atual[cat.id] || 0).padStart(5)} ${String(nov.length).padStart(7)} ${q(i => i.dados.instagram)}  ${q(i => i.dados.facebook)}  ${q(i => ehCelular(i.dados.whatsapp))}  ${q(i => i.dados.fotos.length)}  ${q(i => i.secreto)}`);
+    console.log(`  ${cat.id.padEnd(26)} ${String(atual[cat.id] || 0).padStart(5)} ${String(nov.length).padStart(7)} ${q(i => i.acao === 'atualizar')}   ${q(i => i.dados.instagram)}  ${q(i => i.dados.facebook)}  ${q(i => ehCelular(i.dados.whatsapp))}  ${q(i => i.dados.fotos.length)}  ${q(i => i.secreto)}`);
   }
   const atualiz = itens.filter(i => i.acao === 'atualizar').length;
-  console.log(`\n  NOVOS: ${tn}   já existentes que serão completados: ${atualiz}`);
+  console.log(`\n  NOVOS: ${tn}   já existentes que serão atualizados: ${atualiz}`);
   console.log(`  base hoje ${base.docs.size} → depois de gravar ${base.docs.size + tn}`);
-  if (fracas.length) console.log(`\n  Categorias que ficariam com menos de 25: ${fracas.join(', ')}`);
+  if (vazias.length) console.log(`  Ainda vazias: ${vazias.length} (${vazias.slice(0, 12).join(', ')}${vazias.length > 12 ? '…' : ''})`);
 
   // Planilha para conferir (abre no Excel / cola no Sheets)
   const H = ['acao', 'puntaje', 'secreto', 'categoria', 'nombre', 'whatsapp', 'instagram', 'facebook', 'catalogo', 'direccion', 'observaciones', 'fotos', 'googleMaps'];
@@ -574,8 +701,7 @@ async function etapaRevisar() {
     return String(Array.isArray(v) ? v.length : v ?? '').replace(/[\t\r\n]+/g, ' ');
   }).join('\t'))];
   fs.writeFileSync(path.join(DADOS, 'revisao.tsv'), '﻿' + linhas.join('\n'), 'utf8');
-  console.log(`\n  Planilha: ${path.join(DADOS, 'revisao.tsv')}`);
-  console.log('  Próximo passo: gravar (simulação) e depois gravar --aplicar\n');
+  console.log(`\n  Planilha: ${path.join(DADOS, 'revisao.tsv')}\n`);
 }
 
 // =====================================================================
@@ -589,7 +715,6 @@ async function etapaGravar() {
   const db = firestore();
   const { FieldValue } = require('firebase-admin/firestore');
   const base = await indiceDaBase(db);
-  const nossa = (u) => String(u).includes('firebasestorage.googleapis.com');
 
   let novos = 0, atualizados = 0, intactos = 0;
   const tocados = [];
@@ -605,7 +730,7 @@ async function etapaGravar() {
         googleId: it.googleId, placeId: it.placeId, puntaje: it.puntaje, fonte: 'outscraper',
         actualizadoEn: FieldValue.serverTimestamp(),
       });
-      novos++; tocados.push(ref.id);
+      novos++; if (it.dados.fotos.length) tocados.push(ref.id);
     } else {
       const atual = base.docs.get(it.id);
       if (!atual) continue;
@@ -629,7 +754,7 @@ async function etapaGravar() {
   }
 
   console.log(`\n=== GRAVAR ${APLICAR ? '(APLICANDO)' : '(simulação — nada é gravado)'} ===`);
-  console.log(`  novos: ${novos}   completados: ${atualizados}   sem nada a completar: ${intactos}`);
+  console.log(`  novos: ${novos}   atualizados: ${atualizados}   sem nada a mudar: ${intactos}   com foto para hospedar: ${tocados.length}`);
   if (!APLICAR) { console.log('\n  Para gravar de verdade: ... gravar --aplicar\n'); return; }
 
   if (n) flush();
@@ -665,9 +790,9 @@ async function atualizarStats(db) {
 }
 
 // =====================================================================
-const ETAPAS = { plano: etapaPlano, buscar: etapaBuscar, redes: etapaRedes, fotos: etapaFotos, revisar: etapaRevisar, gravar: etapaGravar };
+const ETAPAS = { plano: etapaPlano, buscar: etapaBuscar, recuperar: etapaRecuperar, refrescar: etapaRefrescar, redes: etapaRedes, fotos: etapaFotos, revisar: etapaRevisar, gravar: etapaGravar };
 if (!ETAPAS[ETAPA]) {
-  console.log('\n  Uso: node scripts/outscraper/outscraper.js <plano|buscar|redes|fotos|revisar|gravar> [opções]');
+  console.log('\n  Uso: node scripts/outscraper/outscraper.js <plano|buscar|recuperar|refrescar|redes|fotos|revisar|gravar> [opções]');
   console.log('  Detalhes no topo deste arquivo.\n');
   process.exit(1);
 }

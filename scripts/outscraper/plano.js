@@ -277,13 +277,15 @@ const PLANO = {
   lembrancas: { termos: ['atacado lembrancinhas', 'fábrica de lembrancinhas personalizadas'], polos: POLOS_FESTAS },
 };
 
-// Monta a lista de buscas de uma categoria
-function buscasDe(catId) {
+// Monta a lista de buscas de uma categoria. Termos e polos estão em ordem de
+// importância: no modo econômico usa-se só os primeiros de cada lista.
+function buscasDe(catId, { maxTermos = Infinity, maxPolos = Infinity } = {}) {
   const p = PLANO[catId];
   if (!p) return [];
-  const polos = p.polos || POLOS_PADRAO;
+  const termos = p.termos.slice(0, maxTermos);
+  const polos = (p.polos || POLOS_PADRAO).slice(0, maxPolos);
   const out = [];
-  for (const termo of p.termos) for (const polo of polos) out.push({ cat: catId, termo, polo, query: `${termo}, ${polo}` });
+  for (const termo of termos) for (const polo of polos) out.push({ cat: catId, termo, polo, query: `${termo}, ${polo}` });
   return out;
 }
 

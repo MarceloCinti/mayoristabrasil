@@ -32,6 +32,8 @@
  *     --aplicar          grava de verdade (sem isto, é só relatório)
  *     --limite=50        processa só os primeiros N proveedores (teste)
  *     --max-fotos=3      quantas fotos por proveedor (padrão 5)
+ *     --ids=arquivo.json só os proveedores desta lista de ids (o importador
+ *                        do Outscraper usa isto logo depois de gravar)
  *
  * É seguro repetir: fotos que já estão no nosso Storage são puladas, então
  * se o script cair no meio, rodar de novo continua de onde parou.
@@ -40,13 +42,16 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const admin = require('firebase-admin');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
+const { getStorage } = require('firebase-admin/storage');
 
 // ===== Opções =====
 const args = process.argv.slice(2);
 const APLICAR = args.includes('--aplicar');
 const LIMITE = Number((args.find(a => a.startsWith('--limite=')) || '').split('=')[1]) || Infinity;
 const MAX_FOTOS = Number((args.find(a => a.startsWith('--max-fotos=')) || '').split('=')[1]) || 5;
+const ARQ_IDS = (args.find(a => a.startsWith('--ids=')) || '').slice(6);
 const CONCORRENCIA = 4;          // downloads simultâneos
 const TAMANHO_MAX = 8 * 1024 * 1024; // 8 MB por foto
 
@@ -61,12 +66,13 @@ if (!fs.existsSync(CHAVE)) {
   process.exit(1);
 }
 
-admin.initializeApp({
-  credential: admin.credential.cert(require(CHAVE)),
+const app = initializeApp({
+  credential: cert(require(CHAVE)),
   storageBucket: BUCKET,
 });
-const db = admin.firestore();
-const bucket = admin.storage().bucket();
+const db = getFirestore(app);
+db.settings({ preferRest: true }); // o gRPC trava em algumas redes Windows
+const bucket = getStorage(app).bucket();
 
 // Já está hospedada por nós?
 const jaNossa = (url) =>
@@ -129,7 +135,9 @@ async function emLotes(itens, n, fn) {
   console.log('bucket:', BUCKET, '| máx', MAX_FOTOS, 'fotos por proveedor\n');
 
   const snap = await db.collection('proveedores').get();
-  const docs = snap.docs.slice(0, LIMITE === Infinity ? undefined : LIMITE);
+  const soEstes = ARQ_IDS ? new Set(JSON.parse(fs.readFileSync(ARQ_IDS, 'utf8'))) : null;
+  const todos = soEstes ? snap.docs.filter(d => soEstes.has(d.id)) : snap.docs;
+  const docs = todos.slice(0, LIMITE === Infinity ? undefined : LIMITE);
   console.log('proveedores lidos:', snap.size, LIMITE !== Infinity ? `(processando ${docs.length})` : '');
 
   let semFoto = 0, jaOk = 0, rehospedadas = 0, falhas = 0, docsAtualizados = 0;

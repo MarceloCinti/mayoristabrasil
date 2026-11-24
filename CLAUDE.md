@@ -185,10 +185,20 @@ Vermelho sobrevive só onde significa **perigo** (excluir, erro), não marca.
    para fotos do Google Maps (`lh3.googleusercontent.com/gps-cs-s/...`) em vez de
    baixar as imagens. Esses links expiram: hoje dão **403**. O componente
    `Foto.tsx` mostra um placeholder no lugar do ícone quebrado, mas as fotos não
-   voltam. Conserto: reimportar com export novo do Outscraper e rodar
-   `node scripts/rehospedar-fotos.js --aplicar`, que baixa e hospeda no Storage
-   do projeto. Rode **logo após** o import — links velhos nem dão para baixar.
-   O script precisa da chave de serviço e é seguro repetir.
+   voltam. Conserto: rodar o importador `scripts/outscraper/outscraper.js`
+   (abaixo). O `gravar --aplicar` dele já chama `rehospedar-fotos.js`, que
+   baixa as fotos novas e hospeda no Storage do projeto na mesma hora — links
+   do Google duram poucos dias.
+
+1b. **Importador do Outscraper (nov/2026).** `scripts/outscraper/` busca
+   fornecedores pela API do Outscraper para as 151 categorias
+   (`plano.js` = o que buscar e em que polo), completa Instagram/Facebook/
+   WhatsApp lendo o site de cada um (grátis), pontua (foto + redes + celular
+   primeiro), cruza com a base para não duplicar e grava. Fábricas com poucas
+   avaliações entram como `esSecreto` (aparecem em "Secretos"). Etapas e
+   custos no topo do `outscraper.js`. Precisa de `OUTSCRAPER_API_KEY` no
+   `.env.local`; dados brutos em `scripts/outscraper/dados/` (fora do git).
+   Só `buscar` e `fotos` gastam, e só até o `--orcamento` passado.
 
 2. **Webhook da Hotmart: ligado (29/10/2026).** `src/pages/api/hotmart-webhook.ts`
    libera `pago: true` quando a Hotmart aprova o cartão (e revoga em reembolso/

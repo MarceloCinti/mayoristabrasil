@@ -20,3 +20,6 @@ serviceAccount*.json
 # sifat/ (sistema Python de trânsito) foi movido para C:\sifat e tem o
 # repositório próprio. Documento pessoal solto na raiz:
 Nota_Solicitud_Donacion_Record_Electric.docx
+
+# Dados brutos do Outscraper (grandes, regeráveis)
+scripts/outscraper/dados/

@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { FaWhatsapp, FaInstagram, FaFacebook, FaMapMarkerAlt, FaTruck } from 'react-icons/fa';
+import { FaWhatsapp, FaPhoneAlt, FaInstagram, FaFacebook, FaMapMarkerAlt, FaTruck } from 'react-icons/fa';
 import { FiHeart, FiStar, FiX, FiImage, FiThumbsUp, FiCornerDownRight, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { useCategorias } from '@/lib/useCategorias';
-import { Proveedor, Resena, Respuesta, EstadoFav, ESTADOS_FAV } from '@/lib/proveedorTypes';
+import { Proveedor, Resena, Respuesta, EstadoFav, ESTADOS_FAV, contactoDe } from '@/lib/proveedorTypes';
 import Foto from './Foto';
 import styles from './ProveedorCard.module.css';
 
@@ -59,7 +59,7 @@ export default function ProveedorCard({ p, estadoFav, resenas, miUid, onToggleFa
   const avg = resenas.length ? resenas.reduce((a, r) => a + (r.estrellas || 0), 0) / resenas.length : 0;
   const miResena = resenas.find(r => r.uid === miUid);
 
-  const wppLink = p.whatsapp ? `https://wa.me/${p.whatsapp.replace(/\D/g, '')}` : null;
+  const { wa: wppLink, tel: telLink } = contactoDe(p);
   const igLink = p.instagram ? `https://instagram.com/${p.instagram.replace('@', '')}` : null;
 
   return (
@@ -102,7 +102,7 @@ export default function ProveedorCard({ p, estadoFav, resenas, miUid, onToggleFa
       {open && (
         <Modal
           p={p} cat={cat} estadoFav={estadoFav} resenas={resenas} avg={avg} miResena={miResena} miUid={miUid}
-          wppLink={wppLink} igLink={igLink}
+          wppLink={wppLink} telLink={telLink} igLink={igLink}
           onClose={() => setOpen(false)}
           onSetEstado={onSetEstado} onSaveResena={onSaveResena}
           onToggleLike={onToggleLike} onAddRespuesta={onAddRespuesta}
@@ -112,7 +112,7 @@ export default function ProveedorCard({ p, estadoFav, resenas, miUid, onToggleFa
   );
 }
 
-function Modal({ p, cat, estadoFav, resenas, avg, miResena, miUid, wppLink, igLink, onClose, onSetEstado, onSaveResena, onToggleLike, onAddRespuesta }: any) {
+function Modal({ p, cat, estadoFav, resenas, avg, miResena, miUid, wppLink, telLink, igLink, onClose, onSetEstado, onSaveResena, onToggleLike, onAddRespuesta }: any) {
   const [estrellas, setEstrellas] = useState<number>(miResena?.estrellas || 0);
   const [texto, setTexto] = useState<string>(miResena?.texto || '');
   const [enviando, setEnviando] = useState(false);
@@ -195,6 +195,7 @@ function Modal({ p, cat, estadoFav, resenas, avg, miResena, miUid, wppLink, igLi
         {/* Acciones */}
         <div className={styles.actions}>
           {wppLink && <a href={wppLink} target="_blank" rel="noreferrer" className={styles.aWpp}><FaWhatsapp /> WhatsApp</a>}
+          {telLink && <a href={telLink} className={styles.aTel}><FaPhoneAlt /> Llamar</a>}
           {igLink && <a href={igLink} target="_blank" rel="noreferrer" className={styles.aIg}><FaInstagram /> Instagram</a>}
           {p.facebook && <a href={p.facebook} target="_blank" rel="noreferrer" className={styles.aIg}><FaFacebook /> Facebook</a>}
           {p.googleMaps && <a href={p.googleMaps} target="_blank" rel="noreferrer" className={styles.aMap}><FaMapMarkerAlt /> Mapa</a>}

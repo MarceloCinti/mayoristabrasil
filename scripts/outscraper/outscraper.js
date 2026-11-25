@@ -20,6 +20,10 @@
  *   redes      [filtro]               GRÁTIS. Abre o site de cada um e pega Instagram,
  *                                     Facebook e WhatsApp.
  *   fotos      [filtro] --usd=2 [--por-lugar=4]   Fotos extras dos escolhidos (opcional).
+ *   galeria    [filtro] --usd=55 [--por-lugar=10] [--max=N] --aplicar
+ *                                     Fotos do Google para TODOS os fornecedores da base, não só
+ *                                     os novos. Baixa e hospeda no nosso Storage na hora e troca
+ *                                     as fotos do fornecedor. Quem já tem galeria é pulado.
  *   revisar    [filtro]               Escolhe, pontua e cruza com a base. Relatório e
  *                                     planilha em dados/revisao.tsv. Não grava nada.
  *   gravar     [filtro] [--aplicar]   Grava (sem --aplicar é simulação), atualiza os números
@@ -583,11 +587,13 @@ function firestore() {
   if (!fs.existsSync(CHAVE)) { console.error('\n  Falta scripts/serviceAccount.json (ver rehospedar-fotos.js)\n'); process.exit(1); }
   const { initializeApp, cert, getApps } = require('firebase-admin/app');
   const { getFirestore } = require('firebase-admin/firestore');
-  const app = getApps()[0] || initializeApp({ credential: cert(require(CHAVE)) });
+  const app = getApps()[0] || initializeApp({ credential: cert(require(CHAVE)), storageBucket: BUCKET });
   _db = getFirestore(app);
   _db.settings({ preferRest: true }); // o gRPC trava em algumas redes Windows
   return _db;
 }
+
+const BUCKET = 'mayorista-brasil.firebasestorage.app';
 
 const nomeChave = (s) => sem(s).replace(/[^a-z0-9]/g, '');
 
@@ -812,9 +818,125 @@ async function atualizarStats(db) {
 }
 
 // =====================================================================
-const ETAPAS = { plano: etapaPlano, buscar: etapaBuscar, recuperar: etapaRecuperar, refrescar: etapaRefrescar, redes: etapaRedes, fotos: etapaFotos, revisar: etapaRevisar, gravar: etapaGravar };
+// GALERIA: várias fotos do Google para CADA fornecedor da base, já
+// hospedadas no nosso Storage na mesma hora (os links do Google expiram).
+// =====================================================================
+const DIR_GALERIA = path.join(DADOS, 'galeria');
+const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0 Safari/537.36';
+
+// Fotos de um lugar na resposta do /maps/photos-v3, sem repetir, em 1200x900
+function galeriaDe(lugar, max) {
+  const vistos = new Set(), urls = [];
+  for (const f of (lugar && lugar.photos_data) || []) {
+    const base = String(f.photo_url || '').replace(/=[^/]*$/, '');
+    if (!base.startsWith('https://') || vistos.has(f.photo_id || base)) continue;
+    vistos.add(f.photo_id || base);
+    urls.push(base + '=w1200-h900-k-no');
+    if (urls.length >= max) break;
+  }
+  if (!urls.length && lugar && lugar.photo) urls.push(String(lugar.photo).replace(/=w\d+-h\d+-k-no$/, '=w1200-h900-k-no'));
+  return urls;
+}
+
+async function baixarFoto(url) {
+  const r = await fetch(url, { headers: { 'User-Agent': UA } });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const tipo = r.headers.get('content-type') || '';
+  if (!tipo.startsWith('image/')) throw new Error('não é imagem');
+  const buf = Buffer.from(await r.arrayBuffer());
+  if (buf.length < 1024 || buf.length > 8 * 1024 * 1024) throw new Error('tamanho estranho');
+  return { buf, tipo };
+}
+
+// Baixa, tira as repetidas (mesmo conteúdo) e sobe para proveedores/<id>/g<n>.jpg
+async function hospedarGaleria(docId, urls) {
+  const crypto = require('crypto');
+  const { getStorage } = require('firebase-admin/storage');
+  firestore();
+  const bucket = getStorage().bucket();
+  const baixadas = await Promise.all(urls.map(u => baixarFoto(u).catch(() => null)));
+  const hashes = new Set(), finais = [];
+  for (const b of baixadas) {
+    if (!b) continue;
+    const h = crypto.createHash('sha1').update(b.buf).digest('hex');
+    if (hashes.has(h)) continue;
+    hashes.add(h);
+    finais.push(b);
+  }
+  return Promise.all(finais.map(async ({ buf, tipo }, i) => {
+    const ext = tipo.includes('png') ? 'png' : tipo.includes('webp') ? 'webp' : 'jpg';
+    const destino = `proveedores/${docId}/g${i}.${ext}`;
+    const token = crypto.randomUUID();
+    await bucket.file(destino).save(buf, {
+      resumable: false,
+      metadata: { contentType: tipo, cacheControl: 'public, max-age=31536000', metadata: { firebaseStorageDownloadTokens: token } },
+    });
+    return `https://firebasestorage.googleapis.com/v0/b/${BUCKET}/o/${encodeURIComponent(destino)}?alt=media&token=${token}`;
+  }));
+}
+
+async function etapaGaleria() {
+  const chave = chaveApi();
+  const POR_LUGAR = Number(opt('por-lugar', 10));
+  fs.mkdirSync(DIR_GALERIA, { recursive: true });
+  const ids = new Set(categoriasFiltradas().map(c => c.id));
+  const db = firestore();
+  const snap = await db.collection('proveedores').get();
+  const todos = snap.docs.map(d => ({ id: d.id, ref: d.ref, ...d.data() }))
+    .filter(p => ids.has(p.categoria) && p.placeId && !p.galeriaEm);
+  // Primeiro quem está sem foto nossa (quebrada ou nenhuma)
+  todos.sort((a, b) => Number((a.fotos || []).some(nossa)) - Number((b.fotos || []).some(nossa)));
+  const alvo = todos.slice(0, Number(opt('max', Infinity)));
+
+  // Só troca as fotos quando alguma nova deu certo; senão mantém as atuais
+  let hospedados = 0, semNovas = 0, totalFotos = 0;
+  async function aplicar(p, urls) {
+    if (!APLICAR) { semNovas += urls.length ? 0 : 1; return; }
+    const novas = urls.length ? await hospedarGaleria(p.id, urls) : [];
+    const upd = { galeriaEm: Date.now() };
+    if (novas.length) { upd.fotos = novas; hospedados++; totalFotos += novas.length; } else semNovas++;
+    await p.ref.update(upd);
+  }
+
+  // 1) Grátis: galerias já pagas que ficaram sem gravar (o script caiu no meio)
+  const doCache = alvo.filter(p => fs.existsSync(path.join(DIR_GALERIA, p.id + '.json')));
+  const novos = alvo.filter(p => !doCache.includes(p));
+  console.log(`\n=== GALERIA === ${alvo.length} fornecedores · ${POR_LUGAR} fotos cada · ${doCache.length} já pagos no cache`);
+  console.log(`  custo máximo: ${usd(novos.length * POR_LUGAR * PRECO.foto)}`);
+  if (!APLICAR) { console.log('  SIMULAÇÃO: nada foi buscado nem gravado. Use --aplicar.\n'); return; }
+  for (const p of doCache) await aplicar(p, lerJSON(path.join(DIR_GALERIA, p.id + '.json'), { urls: [] }).urls);
+
+  // 2) Pago
+  if (!novos.length) { console.log('\n  Nada a buscar.\n'); return; }
+  const { teto, saldoInicial } = await tetoUsd(chave);
+  const LOTE = 20;
+  let gasto = 0;
+  for (let i = 0; i < novos.length; i += LOTE) {
+    const lote = novos.slice(i, i + LOTE);
+    if (!(await cabe(chave, saldoInicial, teto, gasto, lote.length * POR_LUGAR * PRECO.foto))) { console.log(`\n  Parei no teto (${usd(teto)}). Faltam ${novos.length - i}.`); break; }
+    const env = await chamar('/maps/photos-v3', {
+      query: lote.map(p => p.placeId), photosLimit: POR_LUGAR, limit: 1, tag: 'all', language: 'pt', region: 'BR', async: 'true',
+    }, chave);
+    const dados = (await aguardar(env.id, chave)).flat().filter(Boolean);
+    const porPlace = new Map(dados.map(l => [l.place_id, l]));
+    let n = 0;
+    for (const p of lote) {
+      const urls = galeriaDe(porPlace.get(p.placeId), POR_LUGAR);
+      n += urls.length;
+      gravarJSON(path.join(DIR_GALERIA, p.id + '.json'), { placeId: p.placeId, urls, em: new Date().toISOString() });
+    }
+    gasto += n * PRECO.foto;
+    registrarGasto('fotos', n, n * PRECO.foto);
+    await Promise.all(lote.map(p => aplicar(p, lerJSON(path.join(DIR_GALERIA, p.id + '.json'), { urls: [] }).urls)));
+    console.log(`  ${String(i + lote.length).padStart(4)}/${novos.length}  +${n} fotos  (${usd(gasto)})  com galeria nova ${hospedados}`);
+  }
+  console.log(`\n  Com galeria nova: ${hospedados} (${totalFotos} fotos) · sem foto nova: ${semNovas}. Saldo: ${usd(await saldo(chave))}\n`);
+}
+
+// =====================================================================
+const ETAPAS = { plano: etapaPlano, buscar: etapaBuscar, recuperar: etapaRecuperar, refrescar: etapaRefrescar, redes: etapaRedes, fotos: etapaFotos, galeria: etapaGaleria, revisar: etapaRevisar, gravar: etapaGravar };
 if (!ETAPAS[ETAPA]) {
-  console.log('\n  Uso: node scripts/outscraper/outscraper.js <plano|buscar|recuperar|refrescar|redes|fotos|revisar|gravar> [opções]');
+  console.log('\n  Uso: node scripts/outscraper/outscraper.js <plano|buscar|recuperar|refrescar|redes|fotos|galeria|revisar|gravar> [opções]');
   console.log('  Detalhes no topo deste arquivo.\n');
   process.exit(1);
 }

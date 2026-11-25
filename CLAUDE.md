@@ -216,6 +216,14 @@ Vermelho sobrevive só onde significa **perigo** (excluir, erro), não marca.
    (`pay.hotmart.com/B108243731O`) dava "Produto indisponível" e `config/pago.hotmartActivo`
    estava desligado — só ativar em `/admin/datos-pago` quando o checkout abrir.
 
+2b. **Galeria e WhatsApp (25/11/2026).** Etapa `galeria` do importador: até 10
+   fotos do Google por fornecedor, já hospedadas no Storage (`proveedores/<id>/g<n>`);
+   marca `galeriaEm` e pula quem já tem. Custa ~US$ 0,02 por fornecedor; ~2.540
+   ainda faltam, esperando saldo na Outscraper. No card, `contactoDe()`
+   (`proveedorTypes.ts`) mostra WhatsApp só para celular ou número verificado
+   (`whatsappVerificado` = dígitos + `whatsappTieneWa`); fixo vira botão "Llamar".
+   A verificação real (serviço pago tipo Apify) ainda não existe: falta conta/token.
+
 3. **Dados de transferência vazios.** Preencher em `/admin/datos-pago`. Enquanto
    vazio, o popup mostra um botão de pedir os dados por WhatsApp.
 

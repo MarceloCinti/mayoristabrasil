@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { adminAuth, adminBucket, adminDb } from '@/lib/firebaseAdmin';
+import { adminDb, linkAssinado, verificarToken } from '@/lib/firebaseAdmin';
 import { tieneAcceso } from '@/lib/trial';
 import { TODAS_CLASES } from '@/lib/curso';
 
@@ -19,18 +19,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') return res.status(405).json({ error: 'método' });
 
-  const auth = adminAuth();
   const db = adminDb();
-  const bucket = adminBucket();
-  if (!auth || !db || !bucket) return res.status(500).json({ error: 'servidor sin configurar' });
+  if (!db) return res.status(500).json({ error: 'servidor sin configurar' });
 
   const token = (req.headers.authorization || '').replace(/^Bearer /, '');
-  let uid: string;
-  try {
-    uid = (await auth.verifyIdToken(token)).uid;
-  } catch {
-    return res.status(401).json({ error: 'sesión inválida' });
-  }
+  const uid = await verificarToken(token);
+  if (!uid) return res.status(401).json({ error: 'sesión inválida' });
 
   const clase = String(req.body?.clase || '');
   if (!TODAS_CLASES.some(c => c.id === clase)) return res.status(400).json({ error: 'clase' });
@@ -45,11 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!ruta || !ruta.startsWith('curso/')) return res.status(404).json({ error: 'sin video' });
 
   const expira = Date.now() + DURACION_LINK_MS;
-  try {
-    const [url] = await bucket.file(ruta).getSignedUrl({ version: 'v4', action: 'read', expires: expira });
-    return res.status(200).json({ url, expira });
-  } catch (e) {
-    console.error('curso-video firma', e);
-    return res.status(500).json({ error: 'no se pudo generar el link' });
-  }
+  const url = linkAssinado(ruta, DURACION_LINK_MS / 1000);
+  if (!url) return res.status(500).json({ error: 'no se pudo generar el link' });
+  return res.status(200).json({ url, expira });
 }

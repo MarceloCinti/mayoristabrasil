@@ -227,6 +227,21 @@ Vermelho sobrevive só onde significa **perigo** (excluir, erro), não marca.
 3. **Dados de transferência vazios.** Preencher em `/admin/datos-pago`. Enquanto
    vazio, o popup mostra um botão de pedir os dados por WhatsApp.
 
+3b. **Bônus 2 e 3 dentro da plataforma (26/11/2026).** Em `/dashboard/bonos` os
+   cards 2 e 3 são fixos no código (`BONOS_INTERNOS`) e ignoram o que houver na
+   coleção `bonos`.
+   - Bono 2 «Diccionario del Negociador» → `/dashboard/mensajes`. 204 mensagens
+     PT (para copiar) + ES (tradução), por etapa da compra e por grupo de
+     categoria, com busca, conversa completa de exemplo e glossário. Dados em
+     `src/lib/mensajesNegociacion.ts`.
+   - Bono 3 «Academia Mayorista» → `/dashboard/curso`. Mini curso estilo Hotmart:
+     7 módulos / 24 aulas em `src/lib/curso.ts` (texto, pontos-chave, tarefa).
+     Vídeos carregados em `/admin/curso` (MP4 até 60 MB no Storage `landing/curso`
+     ou link do YouTube «não listado») e salvos em `contenido/curso.videos`.
+     Progresso do aluno em `usuarios/{uid}.cursoProgreso[aulaId] = {t, d, ok}`;
+     marca sozinho a 90% do vídeo. **Não mude os ids das aulas.** Nenhuma regra
+     do Firestore precisou mudar. Hoje nenhuma aula tem vídeo: falta gravar.
+
 4. **Vídeo do hero.** O hero hoje é um carrossel de 2 fotos (`HeroCarrusel.tsx`),
    não vídeo. Os campos de upload de vídeo do hero foram removidos do admin.
 

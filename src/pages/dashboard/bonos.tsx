@@ -1,7 +1,8 @@
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { FaGift, FaDownload, FaExternalLinkAlt } from 'react-icons/fa';
+import Link from 'next/link';
+import { FaGift, FaDownload, FaExternalLinkAlt, FaArrowRight } from 'react-icons/fa';
 import { db } from '@/lib/firebase';
 import { usePagoGuard } from '@/hooks/usePagoGuard';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -16,10 +17,27 @@ interface Bono {
   archivo?: string;
 }
 
+// Bonos 2 y 3 viven dentro de la plataforma: su título, texto y destino
+// mandan sobre lo que haya en Firestore (colección bonos).
+const BONOS_INTERNOS: Record<number, { titulo: string; descripcion: string; href: string; cta: string }> = {
+  2: {
+    titulo: 'Diccionario del Negociador',
+    descripcion: 'Más de 200 mensajes en portugués, por rubro, del primer «hola» hasta el envío. Busque en español y copie con un clic para WhatsApp o Instagram.',
+    href: '/dashboard/mensajes',
+    cta: 'Abrir diccionario',
+  },
+  3: {
+    titulo: 'Academia Mayorista: de cero a su primera venta',
+    descripcion: 'Mini curso en video: desde que activa su acceso hasta que la mercadería llega a su casa y la vende en Marketplace, Instagram o en su casa.',
+    href: '/dashboard/curso',
+    cta: 'Empezar el curso',
+  },
+};
+
 const BONOS_PADRAO: Bono[] = [
   { id: 'b1', numero: 1, titulo: '50 proveedores con envío directo por WhatsApp', descripcion: 'Lista premium de contactos que despachan directamente al Paraguay sin intermediarios.' },
-  { id: 'b2', numero: 2, titulo: 'Plantillas de mensajes para negociar precios', descripcion: 'Mensajes listos para copiar y enviar — funcionan tanto en WhatsApp como en Instagram.' },
-  { id: 'b3', numero: 3, titulo: 'Cómo empezar la reventa con poco dinero', descripcion: 'Guía paso a paso para arrancar con menos de Gs. 1.000.000 e ir creciendo el negocio.' },
+  { id: 'b2', numero: 2, titulo: 'Diccionario del Negociador', descripcion: '' },
+  { id: 'b3', numero: 3, titulo: 'Academia Mayorista', descripcion: '' },
   { id: 'b4', numero: 4, titulo: 'Calendario de las mejores épocas para comprar', descripcion: 'Cuándo viajar, cuándo hacer pedidos online, cuáles son las mejores temporadas de descuento.' },
 ];
 
@@ -56,28 +74,37 @@ export default function Bonos() {
       </div>
 
       <div className={styles.grid}>
-        {bonos.map(b => (
-          <div key={b.id} className={styles.card}>
+        {bonos.map(b0 => {
+          const interno = BONOS_INTERNOS[b0.numero];
+          const b = interno ? { ...b0, titulo: interno.titulo, descripcion: interno.descripcion } : b0;
+          return (
+          <div key={b.id} className={`${styles.card} ${interno ? styles.cardDestacado : ''}`}>
             <span className={styles.numero}>BONO {b.numero}</span>
             <h3>{b.titulo}</h3>
             <p>{b.descripcion}</p>
             <div className={styles.actions}>
-              {b.enlace && (
+              {interno && (
+                <Link href={interno.href} className={styles.btnEnlace}>
+                  {interno.cta} <FaArrowRight />
+                </Link>
+              )}
+              {!interno && b.enlace && (
                 <a href={b.enlace} target="_blank" rel="noreferrer" className={styles.btnEnlace}>
                   <FaExternalLinkAlt /> Acceder
                 </a>
               )}
-              {b.archivo && (
+              {!interno && b.archivo && (
                 <a href={b.archivo} target="_blank" rel="noreferrer" className={styles.btnDescarga}>
                   <FaDownload /> Descargar
                 </a>
               )}
-              {!b.enlace && !b.archivo && (
+              {!interno && !b.enlace && !b.archivo && (
                 <span className={styles.proximamente}>Próximamente</span>
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </DashboardLayout>
   );

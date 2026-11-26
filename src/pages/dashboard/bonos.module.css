@@ -31,3 +31,6 @@
   font-size: 12px; color: var(--text-mut); font-style: italic;
   padding: 8px 0;
 }
+
+.cardDestacado { border-left-color: var(--brand); box-shadow: 0 10px 30px -18px rgba(18,128,59,.45); }
+.cardDestacado .numero { color: var(--brand); }

@@ -487,8 +487,8 @@ export default function Landing() {
             <div className={styles.bonosGrid}>
               {[
                 'Lista de 50 proveedores con envío directo por WhatsApp',
-                'Plantillas de mensajes para negociar precios',
-                'Cómo empezar la reventa con poco dinero',
+                'Diccionario del Negociador: +200 mensajes en portugués para copiar y enviar al proveedor',
+                'Academia Mayorista: mini curso en video, de cero a su primera venta',
                 'Calendario de las mejores épocas para comprar',
               ].map((b, i) => (
                 <Reveal key={i} delay={i * 0.05}>

@@ -2,7 +2,7 @@ import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import { FaUsers, FaStore, FaBookOpen, FaGift, FaSignOutAlt, FaArrowLeft, FaBars, FaTimes, FaTachometerAlt, FaDesktop, FaHandshake, FaMoneyBillWave, FaEnvelope, FaExchangeAlt, FaCreditCard } from 'react-icons/fa';
+import { FaUsers, FaStore, FaBookOpen, FaGift, FaSignOutAlt, FaArrowLeft, FaBars, FaTimes, FaTachometerAlt, FaDesktop, FaHandshake, FaMoneyBillWave, FaEnvelope, FaExchangeAlt, FaCreditCard, FaGraduationCap } from 'react-icons/fa';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 import styles from './AdminLayout.module.css';
@@ -19,6 +19,7 @@ const NAV = [
   { href: '/admin/proveedores', label: 'Proveedores', icon: <FaStore /> },
   { href: '/admin/contenido', label: 'Contenido', icon: <FaBookOpen /> },
   { href: '/admin/bonos', label: 'Bonos', icon: <FaGift /> },
+  { href: '/admin/curso', label: 'Curso (Bono 3)', icon: <FaGraduationCap /> },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

@@ -106,7 +106,7 @@ export default function MenuProveedores({ icon, className, activeClass, onNaviga
   return (
     <div className={styles.wrap} onMouseEnter={e => abrirNivel1(e.currentTarget)} onMouseLeave={programarCierre}>
       <div className={styles.fila}>
-        <Link href={BASE} className={`${className} ${styles.principal} ${enPagina ? activeClass : ''} ${pos1 ? styles.principalHover : ''}`} onClick={ir}>
+        <Link href={BASE} className={`${className} ${styles.principal} ${enPagina ? activeClass : ''} ${pos1 ? 'menuFxOn' : ''}`} onClick={ir}>
           <span className={styles.icon}>{icon}</span>
           <span>Proveedores</span>
           <FiChevronRight className={styles.flechaDesk} />
@@ -120,13 +120,13 @@ export default function MenuProveedores({ icon, className, activeClass, onNaviga
       {pos1 && (
         <div ref={panel1} className={styles.panel} style={estilo(pos1)}
           onMouseEnter={cancelarCierre} onMouseLeave={programarCierre}>
-          <Link href={BASE} className={`${styles.opcion} ${styles.todos} ${enPagina && !catActual && !grupoActual ? styles.activa : ''}`}
+          <Link href={BASE} className={`${styles.opcion} menuFx ${styles.todos} ${enPagina && !catActual && !grupoActual ? styles.activa : ''}`}
             onClick={ir} onMouseEnter={() => { setGrupoHover(null); setPos2(null); }}>
             <span>Todos los proveedores</span>{num(totalGeneral)}
           </Link>
           {menu.map(g => (
             <Link key={g.grupo} href={hrefGrupo(g.grupo)}
-              className={`${styles.opcion} ${grupoHover === g.grupo ? styles.hover : ''} ${grupoActual === g.grupo ? styles.activa : ''}`}
+              className={`${styles.opcion} menuFx ${grupoHover === g.grupo ? 'menuFxOn' : ''} ${grupoActual === g.grupo ? styles.activa : ''}`}
               onClick={ir} onMouseEnter={e => abrirNivel2(e.currentTarget, g.grupo)}>
               <span>{g.grupo}</span>
               <span className={styles.der}>{num(g.total)}<FiChevronRight size={13} /></span>
@@ -139,12 +139,12 @@ export default function MenuProveedores({ icon, className, activeClass, onNaviga
       {pos1 && pos2 && grupoAbierto && (
         <div ref={panel2} className={styles.panel} style={estilo(pos2)}
           onMouseEnter={cancelarCierre} onMouseLeave={programarCierre}>
-          <Link href={hrefGrupo(grupoAbierto.grupo)} className={`${styles.opcion} ${styles.todos}`} onClick={ir}>
+          <Link href={hrefGrupo(grupoAbierto.grupo)} className={`${styles.opcion} menuFx ${styles.todos}`} onClick={ir}>
             <span>Todo {grupoAbierto.grupo}</span>{num(grupoAbierto.total)}
           </Link>
           {grupoAbierto.items.map(c => (
             <Link key={c.id} href={hrefCat(c.id)}
-              className={`${styles.opcion} ${catActual === c.id ? styles.activa : ''}`} onClick={ir}>
+              className={`${styles.opcion} menuFx ${catActual === c.id ? styles.activa : ''}`} onClick={ir}>
               <span>{c.label}</span>{num(c.count)}
             </Link>
           ))}
@@ -158,16 +158,16 @@ export default function MenuProveedores({ icon, className, activeClass, onNaviga
             const abierto = grupoAcordeon === g.grupo;
             return (
               <div key={g.grupo}>
-                <button type="button" className={styles.accGrupo} onClick={() => setGrupoAcordeon(abierto ? null : g.grupo)}>
+                <button type="button" className={`${styles.accGrupo} menuFx`} onClick={() => setGrupoAcordeon(abierto ? null : g.grupo)}>
                   <span>{g.grupo}</span>
                   <span className={styles.der}>{num(g.total)}{abierto ? <FiChevronDown size={13} /> : <FiChevronRight size={13} />}</span>
                 </button>
                 {abierto && (
                   <div className={styles.accItems}>
-                    <Link href={hrefGrupo(g.grupo)} className={`${styles.accItem} ${styles.todos}`} onClick={ir}>Todo {g.grupo}</Link>
+                    <Link href={hrefGrupo(g.grupo)} className={`${styles.accItem} menuFx ${styles.todos}`} onClick={ir}>Todo {g.grupo}</Link>
                     {g.items.map(c => (
                       <Link key={c.id} href={hrefCat(c.id)}
-                        className={`${styles.accItem} ${catActual === c.id ? styles.activa : ''}`} onClick={ir}>
+                        className={`${styles.accItem} menuFx ${catActual === c.id ? styles.activa : ''}`} onClick={ir}>
                         <span>{c.label}</span>{num(c.count)}
                       </Link>
                     ))}

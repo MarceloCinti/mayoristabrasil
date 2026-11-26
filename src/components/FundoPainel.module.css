@@ -1,0 +1,65 @@
+/* Fundo fixo das áreas logadas. --sy = rolagem em px, --mx/--my = mouse (-1..1). */
+.fundo {
+  --sy: 0; --mx: 0; --my: 0;
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  background:
+    linear-gradient(180deg, #F7FBF8 0%, #FFFFFF 45%, #F3F7FD 100%);
+}
+
+/* Malha de pontos que desliza devagar com a rolagem */
+.pontos {
+  position: absolute; inset: -40px;
+  background-image: radial-gradient(rgba(29,63,148,.13) 1px, transparent 1.4px);
+  background-size: 26px 26px;
+  transform: translate3d(calc(var(--mx) * -6px), calc(var(--sy) * -0.06px), 0);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 60% 40%, #000 30%, transparent 85%);
+          mask-image: radial-gradient(ellipse 80% 70% at 60% 40%, #000 30%, transparent 85%);
+}
+
+/* Cada camada se move numa velocidade (profundidade); a mancha dentro dela deriva sozinha */
+.camada { position: absolute; will-change: transform; }
+.c1 { top: -12%; left: 8%;   transform: translate3d(calc(var(--mx) * 28px),  calc(var(--sy) * -0.18px + var(--my) * 18px), 0) rotate(calc(var(--sy) * 0.02deg)); }
+.c2 { top: 28%;  right: -10%; transform: translate3d(calc(var(--mx) * -36px), calc(var(--sy) * -0.32px + var(--my) * -22px), 0); }
+.c3 { bottom: -18%; left: 30%; transform: translate3d(calc(var(--mx) * 22px),  calc(var(--sy) * -0.1px + var(--my) * 26px), 0); }
+.c4 { top: 55%;  left: -12%;  transform: translate3d(calc(var(--mx) * -18px), calc(var(--sy) * -0.42px + var(--my) * -14px), 0); }
+.c5 { top: 12%;  right: 14%;  transform: translate3d(calc(var(--mx) * 44px),  calc(var(--sy) * -0.24px + var(--my) * 30px), 0) rotate(calc(var(--sy) * 0.08deg)); }
+
+.mancha { display: block; border-radius: 50%; filter: blur(60px); }
+.verde   { width: 560px; height: 520px; background: radial-gradient(circle at 40% 40%, rgba(18,128,59,.30), transparent 68%); animation: deriva1 19s ease-in-out infinite; }
+.amarelo { width: 520px; height: 520px; background: radial-gradient(circle at 50% 50%, rgba(242,196,12,.40), transparent 66%); animation: deriva2 23s ease-in-out infinite; }
+.azul    { width: 640px; height: 480px; background: radial-gradient(circle at 50% 50%, rgba(29,63,148,.24), transparent 68%); animation: deriva3 27s ease-in-out infinite; }
+.verde2  { width: 420px; height: 420px; background: radial-gradient(circle at 50% 50%, rgba(18,128,59,.20), transparent 66%); animation: deriva2 31s ease-in-out infinite reverse; }
+
+/* Anel fino girando — lembra o globo da bandeira */
+.anel {
+  display: block; width: 340px; height: 340px; border-radius: 50%;
+  border: 1.5px dashed rgba(29,63,148,.16);
+  box-shadow: inset 0 0 0 26px rgba(242,196,12,.05);
+  animation: gira 60s linear infinite;
+}
+
+@keyframes deriva1 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%     { transform: translate(90px, 60px) scale(1.12); }
+  66%     { transform: translate(-40px, 110px) scale(.94); }
+}
+@keyframes deriva2 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50%     { transform: translate(-120px, 70px) scale(1.15); }
+}
+@keyframes deriva3 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  40%     { transform: translate(110px, -60px) scale(1.08); }
+  75%     { transform: translate(-80px, -20px) scale(.96); }
+}
+@keyframes gira { to { transform: rotate(360deg); } }
+
+@media (max-width: 900px) {
+  .mancha { filter: blur(45px); }
+  .verde, .amarelo, .azul { width: 380px; height: 360px; }
+  .anel { width: 220px; height: 220px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mancha, .anel { animation: none; }
+  .camada, .pontos { transform: none !important; }
+}

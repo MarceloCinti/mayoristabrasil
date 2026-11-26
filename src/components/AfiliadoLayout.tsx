@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FaHandshake, FaSignOutAlt, FaBars, FaTimes, FaCog, FaStore, FaArrowLeft, FaMoneyBillWave } from 'react-icons/fa';
 import { useAuth } from '@/context/AuthContext';
+import FundoPainel from './FundoPainel';
 import styles from './AfiliadoLayout.module.css';
 
 export default function AfiliadoLayout({ children }: { children: ReactNode }) {
@@ -14,6 +15,7 @@ export default function AfiliadoLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className={styles.layout}>
+      <FundoPainel />
       <button className={styles.burger} onClick={() => setOpen(!open)}>{open ? <FaTimes /> : <FaBars />}</button>
 
       <aside className={`${styles.sidebar} ${open ? styles.sidebarOpen : ''}`}>
@@ -23,14 +25,14 @@ export default function AfiliadoLayout({ children }: { children: ReactNode }) {
         </Link>
 
         <nav className={styles.nav}>
-          <Link href="/afiliado" className={`${styles.navItem} ${router.pathname === '/afiliado' ? styles.active : ''}`} onClick={() => setOpen(false)}>
+          <Link href="/afiliado" className={`${styles.navItem} menuFx ${router.pathname === '/afiliado' ? styles.active : ''}`} aria-current={router.pathname === '/afiliado' ? 'page' : undefined} onClick={() => setOpen(false)}>
             <FaHandshake /> <span>Panel de afiliado</span>
           </Link>
-          <Link href="/cobros" className={`${styles.navItem} ${router.pathname === '/cobros' ? styles.active : ''}`} onClick={() => setOpen(false)}>
+          <Link href="/cobros" className={`${styles.navItem} menuFx ${router.pathname === '/cobros' ? styles.active : ''}`} aria-current={router.pathname === '/cobros' ? 'page' : undefined} onClick={() => setOpen(false)}>
             <FaMoneyBillWave /> <span>Cobro</span>
           </Link>
           {userData?.pago && (
-            <Link href="/dashboard" className={styles.navItem} onClick={() => setOpen(false)}>
+            <Link href="/dashboard" className={`${styles.navItem} menuFx`} onClick={() => setOpen(false)}>
               <FaStore /> <span>Mi acceso</span>
             </Link>
           )}
@@ -38,14 +40,14 @@ export default function AfiliadoLayout({ children }: { children: ReactNode }) {
 
         <div className={styles.footer}>
           {userData?.esAdmin && (
-            <Link href="/admin" className={styles.adminLink}><FaCog /> Panel admin</Link>
+            <Link href="/admin" className={`${styles.adminLink} menuFx`}><FaCog /> Panel admin</Link>
           )}
-          <Link href="/" className={styles.backLink}><FaArrowLeft /> Ir al sitio</Link>
+          <Link href="/" className={`${styles.backLink} menuFx`}><FaArrowLeft /> Ir al sitio</Link>
           <div className={styles.userBox}>
             <div className={styles.userName}>{userData?.nombre}</div>
             <div className={styles.userEmail}>{userData?.email}</div>
           </div>
-          <button onClick={handleLogout} className={styles.logout}><FaSignOutAlt /> Cerrar sesión</button>
+          <button onClick={handleLogout} className={`${styles.logout} menuFx`}><FaSignOutAlt /> Cerrar sesión</button>
         </div>
       </aside>
 

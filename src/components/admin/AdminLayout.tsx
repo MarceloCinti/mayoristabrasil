@@ -5,6 +5,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FaUsers, FaStore, FaBookOpen, FaGift, FaSignOutAlt, FaArrowLeft, FaBars, FaTimes, FaTachometerAlt, FaDesktop, FaHandshake, FaMoneyBillWave, FaEnvelope, FaExchangeAlt, FaCreditCard, FaGraduationCap } from 'react-icons/fa';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
+import FundoPainel from '../FundoPainel';
 import styles from './AdminLayout.module.css';
 
 const NAV = [
@@ -60,6 +61,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className={styles.layout}>
+      <FundoPainel />
       <button className={styles.burger} onClick={() => setOpen(!open)}>
         {open ? <FaTimes /> : <FaBars />}
       </button>
@@ -79,7 +81,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               ? router.pathname === '/admin'
               : router.pathname.startsWith(item.href);
             return (
-              <Link key={item.href} href={item.href} className={`${styles.navItem} ${active ? styles.active : ''}`} onClick={() => setOpen(false)}>
+              <Link key={item.href} href={item.href} className={`${styles.navItem} menuFx ${active ? styles.active : ''}`} aria-current={active ? 'page' : undefined} onClick={() => setOpen(false)}>
                 <span>{item.icon}</span>
                 <span>{item.label}</span>
                 {item.href === '/admin/pagos' && pagosPendientes > 0 && (
@@ -100,14 +102,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </nav>
 
         <div className={styles.footer}>
-          <Link href="/dashboard" className={styles.backLink}>
+          <Link href="/dashboard" className={`${styles.backLink} menuFx`}>
             <FaArrowLeft /> Ir al sitio
           </Link>
           <div className={styles.userBox}>
             <div className={styles.userName}>{userData?.nombre}</div>
             <div className={styles.userEmail}>{userData?.email}</div>
           </div>
-          <button onClick={handleLogout} className={styles.logout}>
+          <button onClick={handleLogout} className={`${styles.logout} menuFx`}>
             <FaSignOutAlt /> Cerrar sesión
           </button>
         </div>

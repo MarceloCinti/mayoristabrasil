@@ -187,3 +187,80 @@ input:focus, textarea:focus, select:focus {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
 }
+
+/* ===================================================================
+   HOVER DOS MENUS — um efeito só para todos os menus do sistema
+   (painel, submenus de Proveedores, admin, afiliado) e, na versão
+   .cardFx, para os cards-atalho (Bonos, Inicio do painel).
+   Ao passar o mouse: faixa verde→amarelo→azul entra da esquerda,
+   um brilho atravessa, a barrinha tricolor acende à esquerda, o ícone
+   dá um pulo e o texto desliza um pouco. Ativo: barrinha fica acesa.
+   Para inventar mais coisa, é aqui.
+   =================================================================== */
+.menuFx {
+  position: relative; isolation: isolate; overflow: hidden;
+  transition: color .25s ease, transform .3s cubic-bezier(.2,.8,.3,1), box-shadow .3s ease;
+}
+.menuFx::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background:
+    linear-gradient(110deg, transparent 38%, rgba(255,255,255,.85) 50%, transparent 62%) no-repeat,
+    linear-gradient(100deg, rgba(18,128,59,.16), rgba(242,196,12,.20) 58%, rgba(29,63,148,.14));
+  background-size: 260% 100%, 100% 100%;
+  background-position: 160% 0, 0 0;
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform .38s cubic-bezier(.2,.8,.3,1), background-position .8s ease;
+}
+.menuFx::after {
+  content: ''; position: absolute; left: 0; top: 18%; bottom: 18%; width: 3px; border-radius: 3px; pointer-events: none;
+  background: linear-gradient(180deg, var(--brand), var(--amarelo), var(--azul));
+  transform: scaleY(0); transition: transform .3s cubic-bezier(.2,.8,.3,1);
+}
+.menuFx > span:first-child, .menuFx > svg:first-child {
+  display: inline-flex; transition: transform .35s cubic-bezier(.3,1.6,.5,1), color .25s;
+}
+.menuFx:hover, .menuFx.menuFxOn { color: var(--text); transform: translateX(4px); }
+.menuFx:hover::before, .menuFx.menuFxOn::before { transform: scaleX(1); background-position: -60% 0, 0 0; }
+.menuFx:hover::after, .menuFx.menuFxOn::after, .menuFx[aria-current="page"]::after { transform: scaleY(1); }
+.menuFx:hover > span:first-child, .menuFx:hover > svg:first-child {
+  color: var(--brand); animation: menuIconPop .5s cubic-bezier(.3,1.6,.5,1) forwards;
+}
+.menuFx:active { transform: translateX(4px) scale(.98); }
+@keyframes menuIconPop {
+  0%   { transform: scale(1) rotate(0); }
+  45%  { transform: scale(1.32) rotate(-14deg); }
+  100% { transform: scale(1.16) rotate(-6deg); }
+}
+
+/* Versão card: mesmo brilho e mesmas cores, com elevação */
+.cardFx {
+  position: relative; isolation: isolate; overflow: hidden;
+  transition: transform .35s cubic-bezier(.2,.8,.3,1), box-shadow .35s ease, border-color .3s;
+}
+.cardFx::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    linear-gradient(110deg, transparent 40%, rgba(255,255,255,.9) 50%, transparent 60%) no-repeat,
+    linear-gradient(120deg, rgba(18,128,59,.07), rgba(242,196,12,.10) 55%, rgba(29,63,148,.07));
+  background-size: 260% 100%, 100% 100%;
+  background-position: 160% 0, 0 0;
+  opacity: 0; transition: opacity .35s ease, background-position .9s ease;
+}
+.cardFx::after {
+  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; pointer-events: none;
+  background: linear-gradient(90deg, var(--brand), var(--amarelo), var(--azul));
+  transform: scaleX(0); transform-origin: left; transition: transform .45s cubic-bezier(.2,.8,.3,1);
+}
+.cardFx:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 22px 44px -22px rgba(29,63,148,.35), 0 6px 16px -10px rgba(18,128,59,.3);
+  border-color: var(--border-strong);
+}
+.cardFx:hover::before { opacity: 1; background-position: -60% 0, 0 0; }
+.cardFx:hover::after { transform: scaleX(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .menuFx, .cardFx, .menuFx::before, .cardFx::before, .menuFx::after, .cardFx::after { transition: none; }
+  .menuFx:hover, .cardFx:hover { transform: none; }
+  .menuFx:hover > span:first-child, .menuFx:hover > svg:first-child { animation: none; }
+}

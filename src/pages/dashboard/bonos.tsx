@@ -78,7 +78,7 @@ export default function Bonos() {
           const interno = BONOS_INTERNOS[b0.numero];
           const b = interno ? { ...b0, titulo: interno.titulo, descripcion: interno.descripcion } : b0;
           return (
-          <div key={b.id} className={`${styles.card} ${interno ? styles.cardDestacado : ''}`}>
+          <div key={b.id} className={`${styles.card} cardFx ${interno ? styles.cardDestacado : ''}`}>
             <span className={styles.numero}>BONO {b.numero}</span>
             <h3>{b.titulo}</h3>
             <p>{b.descripcion}</p>

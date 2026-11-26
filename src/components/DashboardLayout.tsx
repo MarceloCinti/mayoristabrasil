@@ -7,6 +7,7 @@ import { useContadorClics } from '@/hooks/useTrial';
 import { trialUsados, TRIAL_LIMITE } from '@/lib/trial';
 import PaywallModal from './PaywallModal';
 import MenuProveedores from './MenuProveedores';
+import FundoPainel from './FundoPainel';
 import styles from './DashboardLayout.module.css';
 
 const NAV = [
@@ -67,6 +68,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className={styles.layout} onClickCapture={onClickCapture}>
+      <FundoPainel />
       <button className={styles.burger} onClick={() => setOpen(!open)}>
         {open ? <FaTimes /> : <FaBars />}
       </button>
@@ -80,11 +82,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <nav className={styles.nav}>
           {NAV.map(item => {
             if (item.href === '/dashboard/proveedores') return (
-              <MenuProveedores key={item.href} icon={item.icon} className={styles.navItem} activeClass={styles.active} onNavigate={() => setOpen(false)} />
+              <MenuProveedores key={item.href} icon={item.icon} className={`${styles.navItem} menuFx`} activeClass={styles.active} onNavigate={() => setOpen(false)} />
             );
             const active = router.pathname === item.href;
             return (
-              <Link key={item.href} href={item.href} className={`${styles.navItem} ${active ? styles.active : ''}`} onClick={() => setOpen(false)}>
+              <Link key={item.href} href={item.href} className={`${styles.navItem} menuFx ${active ? styles.active : ''}`} aria-current={active ? 'page' : undefined} onClick={() => setOpen(false)}>
                 <span className={styles.icon}>{item.icon}</span>
                 <span>{item.label}</span>
               </Link>
@@ -94,12 +96,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
         <div className={styles.sidebarFooter}>
           {userData?.esAfiliado && (
-            <Link href="/afiliado" className={styles.adminLink} style={{ background: 'rgba(18,128,59,.1)', color: 'var(--verde)' }}>
+            <Link href="/afiliado" className={`${styles.adminLink} menuFx`} style={{ background: 'rgba(18,128,59,.1)', color: 'var(--verde)' }}>
               <FaHandshake /> Panel afiliado
             </Link>
           )}
           {userData?.esAdmin && (
-            <Link href="/admin" className={styles.adminLink}>
+            <Link href="/admin" className={`${styles.adminLink} menuFx`}>
               <FaCog /> Panel admin
             </Link>
           )}
@@ -107,7 +109,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <div className={styles.userName}>{userData?.nombre || 'Usuario'}</div>
             <div className={styles.userEmail}>{userData?.email}</div>
           </div>
-          <button onClick={handleLogout} className={styles.logout}>
+          <button onClick={handleLogout} className={`${styles.logout} menuFx`}>
             <FaSignOutAlt /> Cerrar sesión
           </button>
         </div>

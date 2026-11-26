@@ -219,7 +219,7 @@ export default function Dashboard() {
       >
         {SECCIONES.map(s => (
           <motion.div key={s.href} variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: .4 }}>
-            <Link href={s.href} className={styles.card}>
+            <Link href={s.href} className={`${styles.card} cardFx`}>
               <div className={styles.iconBox} style={{ color: s.color }}>{s.icon}</div>
               <div className={styles.cardBody}>
                 <h3>{s.title}</h3>

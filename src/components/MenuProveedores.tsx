@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, ReactNode, RefObject } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FiChevronRight, FiChevronDown } from 'react-icons/fi';
@@ -47,6 +47,19 @@ export default function MenuProveedores({ icon, className, activeClass, onNaviga
   const [pos2, setPos2] = useState<Pos | null>(null);
   const cierre = useRef<ReturnType<typeof setTimeout> | null>(null);
   const panel1 = useRef<HTMLDivElement>(null);
+  const panel2 = useRef<HTMLDivElement>(null);
+
+  // Depois de desenhar, mede a altura REAL do painel: se passa do fim da tela,
+  // sobe o painel; se nem assim cabe, ele fica com a altura da tela e rola.
+  const encaixar = (ref: RefObject<HTMLDivElement>, pos: Pos | null, set: (p: Pos) => void) => {
+    const el = ref.current;
+    if (!el || !pos) return;
+    const h = el.scrollHeight + 2;
+    const limite = window.innerHeight - 8;
+    if (pos.top + h > limite && pos.top > 8) set({ ...pos, top: Math.max(8, limite - h) });
+  };
+  useLayoutEffect(() => encaixar(panel1, pos1, setPos1), [pos1]);
+  useLayoutEffect(() => encaixar(panel2, pos2, setPos2), [pos2, grupoHover]);
 
   const conHover = () => typeof window !== 'undefined'
     && window.matchMedia('(hover: hover) and (min-width: 901px)').matches;
@@ -62,24 +75,23 @@ export default function MenuProveedores({ icon, className, activeClass, onNaviga
   useEffect(() => { cerrarYa(); }, [router.asPath]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /** Ubica un panel a la derecha de `el`, sin salirse de la pantalla por abajo. */
-  const ubicar = (el: HTMLElement, altoEstimado: number, desdeX?: number): Pos => {
+  const ubicar = (el: HTMLElement, desdeX?: number): Pos => {
     const r = el.getBoundingClientRect();
-    const alto = Math.min(altoEstimado, window.innerHeight - 16);
-    const top = Math.max(8, Math.min(r.top - 6, window.innerHeight - alto - 8));
-    return { top, left: (desdeX ?? r.right) + 4 };
+    return { top: Math.max(8, r.top - 6), left: (desdeX ?? r.right) + 4 };
   };
+  const estilo = (p: Pos) => ({ top: p.top, left: p.left, maxHeight: `calc(100vh - ${p.top + 8}px)` });
 
   const abrirNivel1 = (el: HTMLElement) => {
     if (!conHover()) return;
     cancelarCierre();
-    if (!pos1) setPos1(ubicar(el, 48 + menu.length * 36));
+    if (!pos1) setPos1(ubicar(el));
   };
 
-  const abrirNivel2 = (el: HTMLElement, grupo: string, n: number) => {
+  const abrirNivel2 = (el: HTMLElement, grupo: string) => {
     cancelarCierre();
     setGrupoHover(grupo);
     const derecha = panel1.current?.getBoundingClientRect().right;
-    setPos2(ubicar(el, 48 + n * 34, derecha));
+    setPos2(ubicar(el, derecha));
   };
 
   const grupoAbierto = menu.find(g => g.grupo === grupoHover);
@@ -106,7 +118,7 @@ export default function MenuProveedores({ icon, className, activeClass, onNaviga
 
       {/* Nivel 1 (escritorio): grupos */}
       {pos1 && (
-        <div ref={panel1} className={styles.panel} style={{ top: pos1.top, left: pos1.left }}
+        <div ref={panel1} className={styles.panel} style={estilo(pos1)}
           onMouseEnter={cancelarCierre} onMouseLeave={programarCierre}>
           <Link href={BASE} className={`${styles.opcion} ${styles.todos} ${enPagina && !catActual && !grupoActual ? styles.activa : ''}`}
             onClick={ir} onMouseEnter={() => { setGrupoHover(null); setPos2(null); }}>
@@ -115,7 +127,7 @@ export default function MenuProveedores({ icon, className, activeClass, onNaviga
           {menu.map(g => (
             <Link key={g.grupo} href={hrefGrupo(g.grupo)}
               className={`${styles.opcion} ${grupoHover === g.grupo ? styles.hover : ''} ${grupoActual === g.grupo ? styles.activa : ''}`}
-              onClick={ir} onMouseEnter={e => abrirNivel2(e.currentTarget, g.grupo, g.items.length)}>
+              onClick={ir} onMouseEnter={e => abrirNivel2(e.currentTarget, g.grupo)}>
               <span>{g.grupo}</span>
               <span className={styles.der}>{num(g.total)}<FiChevronRight size={13} /></span>
             </Link>
@@ -125,7 +137,7 @@ export default function MenuProveedores({ icon, className, activeClass, onNaviga
 
       {/* Nivel 2 (escritorio): categorías del grupo */}
       {pos1 && pos2 && grupoAbierto && (
-        <div className={styles.panel} style={{ top: pos2.top, left: pos2.left }}
+        <div ref={panel2} className={styles.panel} style={estilo(pos2)}
           onMouseEnter={cancelarCierre} onMouseLeave={programarCierre}>
           <Link href={hrefGrupo(grupoAbierto.grupo)} className={`${styles.opcion} ${styles.todos}`} onClick={ir}>
             <span>Todo {grupoAbierto.grupo}</span>{num(grupoAbierto.total)}

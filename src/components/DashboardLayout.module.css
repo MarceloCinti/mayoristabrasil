@@ -47,8 +47,10 @@
 .userBox { display: flex; align-items: center; gap: 10px; transition: border-color .2s, box-shadow .2s; }
 .userBox:hover { border-color: var(--brand); box-shadow: 0 6px 16px -10px rgba(18,128,59,.5); }
 .userName { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.userReal { font-size: 12px; color: var(--text); margin-top: 1px; overflow-wrap: anywhere; }
 .userPen { font-size: 10px; color: var(--text-mut); }
-.userBox:hover .userPen { color: var(--brand); }
+.userBox:hover .userReal { font-size: 12px; color: var(--text); margin-top: 1px; overflow-wrap: anywhere; }
+.userPen { color: var(--brand); }
 .userEmail { font-size: 11px; color: var(--text-mut); margin-top: 2px; word-break: break-all; }
 
 .logout {

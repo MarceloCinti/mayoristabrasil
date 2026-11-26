@@ -116,6 +116,7 @@ export default function DashboardLayout({ children, lateral }: { children: React
             <Avatar valor={userData?.avatar} clave={userData?.uid || ''} size={36} />
             <div style={{ minWidth: 0 }}>
               <div className={styles.userName}>{apodoDe(userData)} <FaPen className={styles.userPen} /></div>
+              <div className={styles.userReal}>{userData?.nombre}</div>
               <div className={styles.userEmail}>{userData?.email}</div>
             </div>
           </Link>

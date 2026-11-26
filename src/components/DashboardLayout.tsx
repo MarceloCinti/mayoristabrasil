@@ -103,7 +103,7 @@ export default function DashboardLayout({ children, lateral }: { children: React
 
         <div className={styles.sidebarFooter}>
           {userData?.esAfiliado && (
-            <Link href="/afiliado" className={`${styles.adminLink} menuFx`} style={{ background: 'rgba(18,128,59,.1)', color: 'var(--verde)' }}>
+            <Link href="/afiliado" className={`${styles.adminLink} ${styles.afiliadoLink} menuFx`}>
               <FaHandshake /> Panel afiliado
             </Link>
           )}

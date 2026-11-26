@@ -55,3 +55,15 @@
   .flechaMovil { display: inline-flex; }
   .flechaDesk { display: none; }
 }
+
+/* Dentro del menú lateral azul marino: flecha y acordeón (celular) en claro.
+   Los paneles flotantes de escritorio siguen blancos. */
+.flechaMovil { color: rgba(255,255,255,.7); }
+.flechaMovil:hover { background: rgba(255,255,255,.1); color: #fff; }
+.acordeon .accGrupo { color: rgba(255,255,255,.6); }
+.acordeon .accGrupo:hover { color: #fff; }
+.acordeon .accItem { color: rgba(255,255,255,.85); }
+.acordeon .accItem:hover { color: #fff; }
+.acordeon .todos { color: #7BE3A4; }
+.acordeon .activa, .acordeon .activa:hover { background: rgba(242,196,12,.16); color: #FFD447; }
+.acordeon .count, .acordeon .der { color: rgba(255,255,255,.5); }

@@ -6,6 +6,7 @@ import { FiLock } from 'react-icons/fi';
 import { db } from '@/lib/firebase';
 import { Proveedor, Resena, EstadoFav } from '@/lib/proveedorTypes';
 import { useAuth } from '@/context/AuthContext';
+import { apodoDe } from '@/lib/nickname';
 import { usePagoGuard } from '@/hooks/usePagoGuard';
 import DashboardLayout from '@/components/DashboardLayout';
 import ProveedorCard from '@/components/ProveedorCard';
@@ -58,7 +59,7 @@ export default function Secretos() {
   };
   const saveResena = async (p: Proveedor, estrellas: number, texto: string) => {
     if (!user) return;
-    const resena: Resena = { id: `${user.uid}_${p.id}`, proveedorId: p.id, uid: user.uid, nombre: userData?.nombre || 'Usuario', texto, estrellas };
+    const resena: Resena = { id: `${user.uid}_${p.id}`, proveedorId: p.id, uid: user.uid, nombre: apodoDe(userData), nickname: apodoDe(userData), texto, estrellas };
     await setDoc(doc(db, 'resenas', resena.id), { ...resena, createdAt: serverTimestamp() });
     setResenasMap(prev => {
       const list = (prev[p.id] || []).filter(r => r.uid !== user.uid);
@@ -79,7 +80,7 @@ export default function Secretos() {
   };
   const addRespuesta = async (r: Resena, texto: string) => {
     if (!user) return;
-    const resp = { uid: user.uid, nombre: userData?.nombre || 'Usuario', texto, ts: Date.now() };
+    const resp = { uid: user.uid, nombre: apodoDe(userData), nickname: apodoDe(userData), texto, ts: Date.now() };
     await updateDoc(doc(db, 'resenas', r.id), { respuestas: arrayUnion(resp) });
     setResenasMap(prev => ({
       ...prev,

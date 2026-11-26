@@ -15,6 +15,8 @@ import { useAuth } from '@/context/AuthContext';
 import DashboardLayout from '@/components/DashboardLayout';
 import Foto from '@/components/Foto';
 import BannerArte from '@/components/BannerArte';
+import ActividadLateral from '@/components/ActividadLateral';
+import { apodoDe } from '@/lib/nickname';
 import styles from './index.module.css';
 
 const TIPS = [
@@ -186,6 +188,7 @@ export default function Dashboard() {
   const porId = new Map(proveedores.map(p => [p.id, p]));
   const destacados = cfg.destacados.map(id => porId.get(id)).filter(Boolean) as Proveedor[];
   const tendencia = proveedores.filter(p => p.esTendencia).length;
+  const nombresProv = proveedores.slice(0, 400).map(p => p.nombre).filter(n => n && n.length <= 40 && !/\bbr[aá]s\b/i.test(n));
 
   const menuHome = (() => {
     const counts: Record<string, number> = {};
@@ -200,7 +203,7 @@ export default function Dashboard() {
   })();
 
   return (
-    <DashboardLayout>
+    <DashboardLayout lateral={<ActividadLateral proveedores={nombresProv} />}>
       <Head><title>Inicio — Mayorista Brasil</title></Head>
 
       {/* Bienvenida */}
@@ -209,7 +212,7 @@ export default function Dashboard() {
         <span className={styles.heroBrilho} />
         <div className={styles.heroTexto}>
           <span className={styles.heroPill}><span className={styles.pulso} /> Base actualizada</span>
-          <h1>Hola, <span className={styles.grad}>{userData?.nombre?.split(' ')[0] || 'revendedor'}</span></h1>
+          <h1>Hola, <span className={styles.grad}>{apodoDe(userData)}</span></h1>
           <p>Tu central para comprar en Brasil y revender en Paraguay.</p>
         </div>
         <div className={styles.heroStats}>

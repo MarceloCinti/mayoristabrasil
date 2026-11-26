@@ -138,5 +138,35 @@ service cloud.firestore {
       // Actualiza/elimina: solo admin (marcar pagado)
       allow update, delete: if isAdmin();
     }
+
+    // ===== Foro (nov/2026) =====
+    // Todos leen lo mismo que el resto del contenido; publican solo pagos/admin.
+    // El autor aparece por `apodo` (nunca el nombre real).
+    match /foroTemas/{id} {
+      allow read: if puedeVerContenido();
+      allow create: if isPagado() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.titulo is string && request.resource.data.titulo.size() <= 120 &&
+        request.resource.data.texto is string && request.resource.data.texto.size() <= 4000;
+      // El autor edita su tema; cualquier pago puede dar like o sumar respuestas
+      allow update: if isSignedIn() && resource.data.uid == request.auth.uid &&
+        request.resource.data.uid == resource.data.uid;
+      allow update: if isPagado() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'respuestas', 'ultimaEn']);
+      allow update, delete: if isAdmin();
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+    match /foroRespuestas/{id} {
+      allow read: if puedeVerContenido();
+      allow create: if isPagado() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.texto is string && request.resource.data.texto.size() <= 4000;
+      allow update: if isSignedIn() && resource.data.uid == request.auth.uid &&
+        request.resource.data.uid == resource.data.uid;
+      allow update: if isPagado() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']);
+      allow update, delete: if isAdmin();
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
   }
 }

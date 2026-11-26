@@ -1,7 +1,8 @@
 import { ReactNode, useState, useEffect, MouseEvent as ReactMouseEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FaStore, FaUserSecret, FaTruck, FaFire, FaShieldAlt, FaGift, FaSignOutAlt, FaBars, FaTimes, FaCog, FaHandshake, FaHeart, FaExchangeAlt } from 'react-icons/fa';
+import { FaStore, FaUserSecret, FaTruck, FaFire, FaShieldAlt, FaGift, FaSignOutAlt, FaBars, FaTimes, FaCog, FaHandshake, FaHeart, FaExchangeAlt, FaComments, FaPen } from 'react-icons/fa';
+import { apodoDe } from '@/lib/nickname';
 import { useAuth } from '@/context/AuthContext';
 import { useContadorClics } from '@/hooks/useTrial';
 import { trialUsados, TRIAL_LIMITE } from '@/lib/trial';
@@ -15,6 +16,7 @@ const NAV = [
   { href: '/dashboard/proveedores', label: 'Proveedores', icon: <FaStore /> },
   { href: '/dashboard/secretos', label: 'Proveedores Secretos', icon: <FaUserSecret /> },
   { href: '/dashboard/favoritos', label: 'Favoritos', icon: <FaHeart /> },
+  { href: '/dashboard/foro', label: 'Foro', icon: <FaComments /> },
   { href: '/cambio', label: 'Cambio R$/Gs', icon: <FaExchangeAlt /> },
   { href: '/dashboard/importar', label: 'Datos para importar', icon: <FaTruck /> },
   { href: '/dashboard/tendencias', label: 'Tendencias', icon: <FaFire /> },
@@ -22,7 +24,11 @@ const NAV = [
   { href: '/dashboard/bonos', label: 'Bonos', icon: <FaGift /> },
 ];
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+/**
+ * `lateral`: panel fijo a la derecha (lo usa solo el Inicio). Cuando existe,
+ * el contenido se angosta para no quedar debajo de él.
+ */
+export default function DashboardLayout({ children, lateral }: { children: ReactNode; lateral?: ReactNode }) {
   const router = useRouter();
   const { userData, logout } = useAuth();
   const [open, setOpen] = useState(false);
@@ -55,7 +61,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     const href = el.getAttribute('href') || '';
     if (el.tagName === 'A') {
       if (!href.startsWith('/')) return;                  // externos (WhatsApp, Instagram)
-      if (href === '/' || href.startsWith('/admin') || href.startsWith('/afiliado')) return;
+      if (href === '/' || href.startsWith('/admin') || href.startsWith('/afiliado') || href.startsWith('/dashboard/perfil')) return;
     }
 
     if (gastarClic()) setUsadosLocal(u => u + 1);
@@ -105,22 +111,23 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <FaCog /> Panel admin
             </Link>
           )}
-          <div className={styles.userBox}>
-            <div className={styles.userName}>{userData?.nombre || 'Usuario'}</div>
+          <Link href="/dashboard/perfil" className={styles.userBox} title="Cambiar mi apodo" onClick={() => setOpen(false)}>
+            <div className={styles.userName}>{apodoDe(userData)} <FaPen className={styles.userPen} /></div>
             <div className={styles.userEmail}>{userData?.email}</div>
-          </div>
+          </Link>
           <button onClick={handleLogout} className={`${styles.logout} menuFx`}>
             <FaSignOutAlt /> Cerrar sesión
           </button>
         </div>
       </aside>
 
-      <main className={styles.main}>
+      <main className={`${styles.main} ${lateral ? styles.mainConLateral : ''}`}>
         <div className={bloqueado ? styles.contenidoBloqueado : undefined} aria-hidden={bloqueado}>
           {children}
         </div>
       </main>
 
+      {lateral}
       {bloqueado && <PaywallModal />}
     </div>
   );

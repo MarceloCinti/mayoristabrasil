@@ -28,7 +28,8 @@ export interface Proveedor {
 
 export interface Respuesta {
   uid: string;
-  nombre: string;
+  nombre: string;      // apodo del autor (desde nov/2026 nunca el nombre real)
+  nickname?: string;
   texto: string;
   ts: number;
 }
@@ -37,7 +38,8 @@ export interface Resena {
   id: string;
   proveedorId: string;
   uid: string;
-  nombre: string;
+  nombre: string;      // apodo del autor (desde nov/2026 nunca el nombre real)
+  nickname?: string;
   texto: string;
   estrellas: number;
   createdAt?: any;

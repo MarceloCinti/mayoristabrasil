@@ -1,13 +1,16 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { User, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, signOut } from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { sugerirApodo } from '@/lib/nickname';
 import { auth, db, googleProvider, ADMIN_EMAIL } from '@/lib/firebase';
 
 interface UserData {
   uid: string;
   email: string | null;
   nombre: string;
+  // Apodo público (comentarios, foro). Nosotros tratamos al cliente por `nombre`.
+  nickname?: string;
   pago: boolean;
   fechaCompra: any;
   esAdmin: boolean;
@@ -84,12 +87,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await new Promise(r => setTimeout(r, 300));
         const snap = await getDoc(doc(db, 'usuarios', u.uid));
         if (snap.exists()) {
-          setUserData(snap.data() as UserData);
+          const d = snap.data() as UserData;
+          // Cuentas anteriores a los apodos: se les asigna uno la primera vez.
+          if (!d.nickname) {
+            d.nickname = sugerirApodo(d.nombre || '', u.uid);
+            try { await updateDoc(doc(db, 'usuarios', u.uid), { nickname: d.nickname }); } catch (e) { console.error(e); }
+          }
+          setUserData(d);
         } else {
           const data: UserData = {
             uid: u.uid,
             email: u.email,
             nombre: u.displayName || 'Usuario',
+            nickname: sugerirApodo(u.displayName || '', u.uid),
             pago: false,
             fechaCompra: null,
             esAdmin: u.email === ADMIN_EMAIL,
@@ -125,6 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       uid: cred.user.uid,
       email: cred.user.email,
       nombre,
+      nickname: sugerirApodo(nombre, cred.user.uid),
       pago: false,
       fechaCompra: null,
       esAdmin: cred.user.email === ADMIN_EMAIL,

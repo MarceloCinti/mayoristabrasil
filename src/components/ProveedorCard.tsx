@@ -238,9 +238,9 @@ function Modal({ p, cat, estadoFav, resenas, avg, miResena, miUid, wppLink, telL
               return (
               <div key={r.id} className={styles.comentario}>
                 <div className={styles.comHead}>
-                  <span className={styles.comAvatar}>{(r.nombre || 'U').charAt(0)}</span>
+                  <span className={styles.comAvatar}>{(r.nickname || r.nombre || 'M').charAt(0).toUpperCase()}</span>
                   <div>
-                    <strong>{r.nombre}</strong>
+                    <strong>{r.nickname || r.nombre}</strong>
                     <Estrellas valor={r.estrellas} size={11} />
                   </div>
                   <span className={styles.comFecha}>{fmtDate(r.createdAt)}</span>
@@ -261,7 +261,7 @@ function Modal({ p, cat, estadoFav, resenas, avg, miResena, miUid, wppLink, telL
                     {(r.respuestas || []).map((rp: Respuesta, i: number) => (
                       <div key={i} className={styles.respuesta}>
                         <span className={styles.comAvatarSm}>{(rp.nombre || 'U').charAt(0)}</span>
-                        <div><strong>{rp.nombre}</strong><p>{rp.texto}</p></div>
+                        <div><strong>{rp.nickname || rp.nombre}</strong><p>{rp.texto}</p></div>
                       </div>
                     ))}
                   </div>

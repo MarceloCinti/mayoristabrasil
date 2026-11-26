@@ -2,8 +2,11 @@
  * Bono 3 — mini curso "Academia Mayorista: de cero a su primera venta".
  *
  * La ESTRUCTURA (módulos, clases y el material escrito de cada clase) vive acá.
- * Los VIDEOS se cargan desde el admin (/admin/curso) y se guardan en
- * Firestore `contenido/curso` → { videos: { [claseId]: url } }.
+ * Los VIDEOS se suben desde el admin (/admin/curso) al Storage del proyecto,
+ * carpeta `curso/` (cerrada: sin link público). En Firestore `contenido/curso`
+ * → { videos: { [claseId]: ruta en Storage } }. El alumno recibe un link
+ * firmado de 2 h por /api/curso-video, y lo ve en el reproductor propio
+ * (components/CursoVideo.tsx: sin barra para arrastrar, sólo ±10 s).
  * (contenido/ ya lo leen pagos, admins y quien está en prueba; escribe sólo admin.
  *  No hizo falta tocar las reglas.)
  *
@@ -346,9 +349,3 @@ export function pctClase(p?: ProgresoClase) {
 
 /** Al llegar a este porcentaje del video la clase se marca sola como completada. */
 export const UMBRAL_COMPLETA = 0.9;
-
-/** Devuelve el id de video de YouTube si la URL es de YouTube. */
-export function youtubeId(url: string): string | null {
-  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/);
-  return m ? m[1] : null;
-}

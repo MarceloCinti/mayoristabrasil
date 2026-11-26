@@ -236,8 +236,14 @@ Vermelho sobrevive só onde significa **perigo** (excluir, erro), não marca.
      `src/lib/mensajesNegociacion.ts`.
    - Bono 3 «Academia Mayorista» → `/dashboard/curso`. Mini curso estilo Hotmart:
      7 módulos / 24 aulas em `src/lib/curso.ts` (texto, pontos-chave, tarefa).
-     Vídeos carregados em `/admin/curso` (MP4 até 60 MB no Storage `landing/curso`
-     ou link do YouTube «não listado») e salvos em `contenido/curso.videos`.
+     **Armazenamento e player próprios, sem YouTube (pedido do usuário):** vídeo
+     sobe em `/admin/curso` para o Storage `curso/<aulaId>/…` (até 2 GB; pasta com
+     `read: if false` em `storage.rules` — **regra colada à mão no console do
+     Storage**, igual às do Firestore). `contenido/curso.videos` guarda a *rota*,
+     não um link. O aluno recebe link assinado de 2 h via `/api/curso-video`
+     (confere token + acesso). Player `CursoVideo.tsx`: sem barra de busca, só
+     pausa, velocidade, volume, tela cheia e ±10 s; salto por outro meio é
+     desfeito; sem botão direito/download/PiP; marca d'água com o e-mail do aluno.
      Progresso do aluno em `usuarios/{uid}.cursoProgreso[aulaId] = {t, d, ok}`;
      marca sozinho a 90% do vídeo. **Não mude os ids das aulas.** Nenhuma regra
      do Firestore precisou mudar. Hoje nenhuma aula tem vídeo: falta gravar.

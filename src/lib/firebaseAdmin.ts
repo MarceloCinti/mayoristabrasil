@@ -22,3 +22,18 @@ export function adminDb(): Firestore | null {
   }
   return getFirestore(app);
 }
+
+// Storage (bucket do projeto) e Auth — usados pela rota do curso para
+// conferir quem pede o vídeo e gerar um link temporário assinado.
+import { getStorage } from 'firebase-admin/storage';
+import { getAuth, Auth } from 'firebase-admin/auth';
+
+export function adminBucket() {
+  if (!adminDb() || !app) return null;
+  return getStorage(app).bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
+}
+
+export function adminAuth(): Auth | null {
+  if (!adminDb() || !app) return null;
+  return getAuth(app);
+}

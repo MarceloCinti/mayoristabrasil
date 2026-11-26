@@ -25,6 +25,17 @@ service firebase.storage {
         && request.resource.contentType.matches('image/.*');
     }
 
+    // Videos del curso (Bono 3): SIN lectura desde el navegador. El alumno los
+    // ve sólo con un link firmado de 2 h que entrega /api/curso-video.
+    // Escribe/borra sólo el admin; hasta 2 GB por video.
+    match /curso/{allPaths=**} {
+      allow read: if false;
+      allow delete: if isAdmin();
+      allow create, update: if isAdmin()
+        && request.resource.size < 2 * 1024 * 1024 * 1024
+        && request.resource.contentType.matches('video/.*');
+    }
+
     // Fotos y videos de proveedores: lectura pública, escritura solo admin
     match /proveedores/{allPaths=**} {
       allow read: if true;

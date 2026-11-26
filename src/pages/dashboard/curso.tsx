@@ -145,8 +145,9 @@ export default function Curso() {
           <div className={styles.player}>
             {!cargado ? null : url ? (
               <CursoVideo
-                key={actual.id + url}
-                url={url}
+                key={actual.id}
+                claseId={actual.id}
+                marcaAgua={user?.email || ''}
                 inicio={pActual?.ok ? 0 : (pActual?.t || 0)}
                 onAvance={(t, d) => onAvance(actual.id, t, d)}
                 onCompleta={() => marcar(actual.id, true)}

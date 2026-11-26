@@ -86,7 +86,7 @@ export default function Landing() {
             <Reveal>
               <div className={styles.heroLeft}>
                 <span className={styles.pill}>
-                  <span className={styles.pillDot} /> Plataforma privada · hecha para Paraguay 🇵🇾
+                  <span className={styles.pillDot} /> Plataforma privada · hecha para Paraguay
                 </span>
                 <h1 className={styles.h1}>
                   {config.heroTitle

@@ -51,7 +51,7 @@ export default function Favoritos() {
       {loading ? (
         <p className={styles.empty}>Cargando…</p>
       ) : favs.length === 0 ? (
-        <div className={styles.empty}>Todavía no guardaste proveedores. Tocá el ❤ en cualquier proveedor para agregarlo.</div>
+        <div className={styles.empty}>Todavía no guardaste proveedores. Tocá el corazón en cualquier proveedor para agregarlo.</div>
       ) : (
         ESTADOS_FAV.map(est => {
           const lista = favs.filter(f => f.estado === est.id);

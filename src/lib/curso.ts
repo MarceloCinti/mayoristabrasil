@@ -71,7 +71,7 @@ export const MODULOS: Modulo[] = [
           'Empiece filtrando por la categoría que le interesa y abra varias fichas. No se quede con el primero: compare tres o cuatro proveedores del mismo rubro.',
           'Cuando un proveedor le guste, márquelo con el corazón. Así arma su lista corta en «Favoritos».',
         ],
-        claves: ['Filtre por grupo y categoría', 'Compare al menos 3 proveedores', 'Guarde con el corazón ❤'],
+        claves: ['Filtre por grupo y categoría', 'Compare al menos 3 proveedores', 'Guarde con el botón del corazón'],
         tarea: 'Guarde 5 proveedores de su rubro en Favoritos.',
         enlace: { href: '/dashboard/proveedores', label: 'Abrir Proveedores' },
       },

@@ -67,7 +67,7 @@ export default function Afiliacion() {
         {/* Hero */}
         <section className={styles.hero}>
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .5 }}>
-            <span className={styles.pill}>💸 Programa de Afiliados</span>
+            <span className={styles.pill}>Programa de Afiliados</span>
             <h1>Ganá dinero extra <span className={styles.grad}>desde tu casa</span>, sin invertir nada</h1>
             <p className={styles.lead}>
               Recomendá Mayorista Brasil con tu link, y ganás una comisión por cada persona que entra. Sin stock, sin vender productos, sin salir de casa.

@@ -60,7 +60,7 @@ export default function AdminAfiliados() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           recipients: [{ email: sol.email, nombre: sol.nombre }],
-          asunto: '¡Tu cuenta de afiliado fue activada! 🎉',
+          asunto: '¡Tu cuenta de afiliado fue activada!',
           mensaje: 'Ya podés ingresar a tu panel de afiliado y empezar a ganar comisiones.\n\nEntrá a la plataforma, copiá tu link de referido y compartilo. ¡Éxitos!',
         }),
       }).catch(() => {});

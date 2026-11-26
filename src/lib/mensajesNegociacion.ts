@@ -37,7 +37,6 @@ export type Seccion = { id: string; titulo: string; descripcion?: string; mensaj
 export type Bloque = {
   id: string;
   titulo: string;
-  emoji: string;
   /** Categorías del catálogo que cubre este bloque (texto informativo). */
   cubre?: string;
   descripcion: string;
@@ -72,7 +71,6 @@ function bloque(b: Omit<Bloque, 'secciones'> & { secciones: SeccionSinId[] }): B
 const pasoAPaso = bloque({
   id: 'paso-a-paso',
   titulo: 'Paso a paso de la compra',
-  emoji: '🧭',
   cubre: 'Todas las categorías',
   descripcion: 'Del primer «hola» hasta que la mercadería llega a su dirección. Sirve para cualquier producto: empiece por acá.',
   secciones: [
@@ -410,7 +408,6 @@ const pasoAPaso = bloque({
 const moda = bloque({
   id: 'moda',
   titulo: 'Moda y accesorios',
-  emoji: '👗',
   cubre: 'Femenino, masculino, infantil, plus size, evangélica, streetwear, fitness, playa, íntima, jeans, calzado, bolsos, joyas, bijutería, relojes, lentes, textil',
   descripcion: 'En ropa lo que cambia son los talles (la «grade»), los colores y la tela.',
   secciones: [
@@ -568,7 +565,6 @@ const moda = bloque({
 const belleza = bloque({
   id: 'belleza',
   titulo: 'Cosméticos y belleza',
-  emoji: '💄',
   cubre: 'Cosméticos, maquillaje, perfumes, cabello, afeitado, esmaltes, equipos y muebles de salón',
   descripcion: 'En cosméticos lo clave es el vencimiento, el registro sanitario y el lote.',
   secciones: [
@@ -632,7 +628,6 @@ const belleza = bloque({
 const casa = bloque({
   id: 'casa',
   titulo: 'Casa, decoración y muebles',
-  emoji: '🏠',
   cubre: 'Utilidades domésticas, cocina, organización, decoración, ajuar, cama, mesa, baño, cortinas, alfombras, iluminación, jardinería, muebles',
   descripcion: 'Acá importan las medidas, el material y que nada se rompa en el viaje.',
   secciones: [
@@ -706,7 +701,6 @@ const casa = bloque({
 const construccion = bloque({
   id: 'construccion',
   titulo: 'Construcción, ferretería, industria y energía',
-  emoji: '🔧',
   cubre: 'Herramientas, eléctricos, hidráulicos, ferretería, tornillos, pinturas, pisos, cerámicas, aluminio, vidrios, soldadura, máquinas, motores, compresores, bombas, energía solar',
   descripcion: 'Lo clave: ficha técnica, voltaje/frecuencia (Paraguay usa 50Hz) y garantía.',
   secciones: [
@@ -812,7 +806,6 @@ const construccion = bloque({
 const automotor = bloque({
   id: 'automotor',
   titulo: 'Automotor',
-  emoji: '🚗',
   cubre: 'Repuestos para autos, camiones y motos, suspensión, frenos, motor, embrague, luces, neumáticos, llantas, baterías, lubricantes, accesorios, sonido',
   descripcion: 'En repuestos todo gira alrededor del código de la pieza y la aplicación (qué vehículo).',
   secciones: [
@@ -876,7 +869,6 @@ const automotor = bloque({
 const electronica = bloque({
   id: 'electronica',
   titulo: 'Electrónicos, informática y seguridad',
-  emoji: '📱',
   cubre: 'Celulares, fundas, protectores, cargadores, auriculares, smartwatch, parlantes, cámaras, computadoras, notebooks, monitores, impresoras, componentes, redes, cables, CFTV, alarmas, control de acceso, cerraduras',
   descripcion: 'Lo clave: modelo exacto, compatibilidad, voltaje y garantía.',
   secciones: [
@@ -954,7 +946,6 @@ const electronica = bloque({
 const bebes = bloque({
   id: 'bebes',
   titulo: 'Bebés, niños, juguetes y fiestas',
-  emoji: '🧸',
   cubre: 'Cochecitos, cunas, juguetes, mamaderas, ropa y accesorios de bebé, moda infantil, decoración de fiestas, Navidad, Halloween, casamientos, globos, recuerdos',
   descripcion: 'Seguridad del producto para bebés, y fechas para fiestas: hay que comprar con anticipación.',
   secciones: [
@@ -1004,7 +995,6 @@ const bebes = bloque({
 const papeleria = bloque({
   id: 'papeleria',
   titulo: 'Papelería y embalajes',
-  emoji: '📦',
   cubre: 'Material escolar, oficina, impresión, embalajes, bolsas, cajas, etiquetas, adhesivos, cintas, embalajes para delivery',
   descripcion: 'Precios por millar y personalización con su marca.',
   secciones: [
@@ -1046,7 +1036,6 @@ const papeleria = bloque({
 const gastronomia = bloque({
   id: 'gastronomia',
   titulo: 'Gastronomía y salud',
-  emoji: '🍳',
   cubre: 'Equipos industriales, panadería, repostería, carnicería, restaurantes, productos hospitalarios, ortopedia, fisioterapia, equipos médicos',
   descripcion: 'Equipos: voltaje, gas y garantía. Salud: registros sanitarios.',
   secciones: [
@@ -1088,7 +1077,6 @@ const gastronomia = bloque({
 const agro = bloque({
   id: 'agro',
   titulo: 'Agro, mascotas y deportes',
-  emoji: '🌱',
   cubre: 'Herramientas agrícolas, riego, bombas, pulverizadores, equipos rurales, cercas eléctricas, semillas, fertilizantes, pet shop, gimnasio, bicicletas, pesca, camping',
   descripcion: 'Agro: registros y permisos. Mascotas: vencimiento. Deportes: talles y medidas.',
   secciones: [

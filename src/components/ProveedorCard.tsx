@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { FaWhatsapp, FaPhoneAlt, FaInstagram, FaFacebook, FaMapMarkerAlt, FaTruck } from 'react-icons/fa';
-import { FiHeart, FiStar, FiX, FiImage, FiThumbsUp, FiCornerDownRight, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiHeart, FiTrendingUp, FiStar, FiX, FiImage, FiThumbsUp, FiCornerDownRight, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { useCategorias } from '@/lib/useCategorias';
 import { Proveedor, Resena, Respuesta, EstadoFav, ESTADOS_FAV, contactoDe } from '@/lib/proveedorTypes';
 import Foto from './Foto';
@@ -70,7 +70,7 @@ export default function ProveedorCard({ p, estadoFav, resenas, miUid, onToggleFa
       <div className={styles.card} data-trial-click onClick={() => setOpen(true)}>
         <div className={styles.thumb}>
           <Foto src={foto || undefined} alt={p.nombre} lazy fallback={<div className={styles.thumbEmpty}><FiImage /></div>} />
-          {p.esTendencia && <span className={styles.tendencia}>🔥 Tendencia</span>}
+          {p.esTendencia && <span className={styles.tendencia}><FiTrendingUp /> Tendencia</span>}
           <button
             className={`${styles.fav} ${estadoFav ? styles.favOn : ''}`}
             onClick={e => { e.stopPropagation(); onToggleFav(p); }}
@@ -170,7 +170,7 @@ function Modal({ p, cat, estadoFav, resenas, avg, miResena, miUid, wppLink, telL
             <h2>{p.nombre}</h2>
             <div className={styles.headMeta}>
               {cat && <span className={styles.cat}>{cat.label}</span>}
-              {p.esTendencia && <span className={styles.tendenciaInline}>🔥 Tendencia</span>}
+              {p.esTendencia && <span className={styles.tendenciaInline}><FiTrendingUp /> Tendencia</span>}
             </div>
           </div>
         </div>

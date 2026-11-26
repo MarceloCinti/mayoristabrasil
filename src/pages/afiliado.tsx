@@ -86,7 +86,7 @@ export default function PanelAfiliado() {
               <input readOnly value={link} className={styles.linkInput} />
               <button onClick={copy} className="btn btn-primary"><FaCopy /> Copiar</button>
             </div>
-            <a href={`https://wa.me/?text=${encodeURIComponent('Mirá esta plataforma para comprar directo del Brás y revender en Paraguay 👉 ' + link)}`} target="_blank" rel="noreferrer" className={styles.shareWpp}>
+            <a href={`https://wa.me/?text=${encodeURIComponent('Mirá esta plataforma para comprar directo del Brás y revender en Paraguay: ' + link)}`} target="_blank" rel="noreferrer" className={styles.shareWpp}>
               <FaWhatsapp /> Compartir por WhatsApp
             </a>
           </div>

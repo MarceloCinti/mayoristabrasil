@@ -186,7 +186,7 @@ export default function AdminEmails() {
           <h3 className={styles.sectionTitle}>Mensaje</h3>
           <div className={styles.formField}>
             <label>Asunto</label>
-            <input value={asunto} onChange={e => setAsunto(e.target.value)} placeholder="Ej: Nuevos proveedores esta semana 🔥" />
+            <input value={asunto} onChange={e => setAsunto(e.target.value)} placeholder="Ej: Nuevos proveedores esta semana" />
           </div>
           <div className={styles.formField} style={{ marginTop: 12 }}>
             <label>Mensaje</label>

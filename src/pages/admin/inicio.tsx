@@ -2,7 +2,7 @@ import Head from 'next/head';
 import { useEffect, useMemo, useState } from 'react';
 import { collection, doc, getDoc, getDocs, setDoc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
-import { FiSave, FiExternalLink, FiPlus, FiTrash2, FiArrowUp, FiArrowDown, FiStar, FiSearch } from 'react-icons/fi';
+import { FiSave, FiExternalLink, FiPlus, FiCheck, FiTrash2, FiArrowUp, FiArrowDown, FiStar, FiSearch } from 'react-icons/fi';
 import { db } from '@/lib/firebase';
 import { Proveedor } from '@/lib/proveedorTypes';
 import {
@@ -175,7 +175,7 @@ export default function AdminInicio() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
                 {resultados.map(p => {
                   const on = cfg.destacados.includes(p.id);
-                  return <button type="button" key={p.id} onClick={() => toggleDestacado(p.id)} className={`${styles.btnSm} ${on ? '' : styles.btnSmGhost}`}>{on ? '✓ ' : '+ '}{p.nombre}</button>;
+                  return <button type="button" key={p.id} onClick={() => toggleDestacado(p.id)} className={`${styles.btnSm} ${on ? '' : styles.btnSmGhost}`}>{on ? <FiCheck /> : <FiPlus />} {p.nombre}</button>;
                 })}
               </div>
             )}

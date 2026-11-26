@@ -206,7 +206,7 @@ export default function Dashboard() {
         <span className={styles.heroBrilho} />
         <div className={styles.heroTexto}>
           <span className={styles.heroPill}><span className={styles.pulso} /> Base actualizada</span>
-          <h1>Hola, <span className={styles.grad}>{userData?.nombre?.split(' ')[0] || 'revendedor'}</span> 👋</h1>
+          <h1>Hola, <span className={styles.grad}>{userData?.nombre?.split(' ')[0] || 'revendedor'}</span></h1>
           <p>Tu central para comprar en Brás y revender en Paraguay.</p>
         </div>
         <div className={styles.heroStats}>
@@ -354,7 +354,7 @@ export default function Dashboard() {
                 <Link key={p.id + '-' + k} href={`/dashboard/proveedores?cat=${p.categoria}`} className={styles.recCard} aria-hidden={k >= recientes.length} tabIndex={k >= recientes.length ? -1 : undefined}>
                   <div className={styles.recThumb}>
                     <Foto src={p.fotos?.[0]} alt={p.nombre} lazy fallback={<div className={styles.recEmpty}><FaStore /></div>} />
-                    {p.esTendencia && <span className={styles.recTend}>🔥</span>}
+                    {p.esTendencia && <span className={styles.recTend}><FiTrendingUp /></span>}
                   </div>
                   <strong>{p.nombre}</strong>
                   <span>{catLabel(p.categoria)}</span>

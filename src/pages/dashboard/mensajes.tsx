@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { FaComments, FaCopy, FaCheck, FaSearch, FaArrowLeft, FaLightbulb, FaReply } from 'react-icons/fa';
 import { usePagoGuard } from '@/hooks/usePagoGuard';
 import DashboardLayout from '@/components/DashboardLayout';
+import IconoRubro from '@/components/IconoRubro';
 import {
   BLOQUES, CONVERSACION_EJEMPLO, GLOSARIO, TOTAL_MENSAJES, normalizar,
   type Bloque, type Mensaje,
@@ -70,14 +71,14 @@ function TarjetaMensaje({ msg, ruta }: { msg: Mensaje; ruta?: string }) {
       <h4 className={styles.pregunta}>{msg.pregunta}</h4>
 
       <div className={styles.burbuja}>
-        <span className={styles.idioma}>🇧🇷 Para enviar (portugués)</span>
-        <p className={styles.pt}><ConCampos texto={msg.pt} /></p>
+        <span className={styles.idioma}>Portugués · para enviar</span>
+        <p className={styles.pt} lang="pt-BR"><ConCampos texto={msg.pt} /></p>
         <BotonCopiar texto={msg.pt} />
       </div>
 
       <div className={styles.traduccion}>
-        <span className={styles.idioma}>🇵🇾 Qué significa</span>
-        <p><ConCampos texto={msg.es} /></p>
+        <span className={styles.idioma}>Español · qué significa</span>
+        <p lang="es"><ConCampos texto={msg.es} /></p>
       </div>
 
       {msg.tip && (
@@ -91,8 +92,8 @@ function TarjetaMensaje({ msg, ruta }: { msg: Mensaje; ruta?: string }) {
           </button>
           {verResp && msg.respuestas.map((r, i) => (
             <div key={i} className={styles.respuesta}>
-              <p className={styles.respPt}>«{r.pt}»</p>
-              <p className={styles.respEs}>{r.es}</p>
+              <p className={styles.respPt} lang="pt-BR">«{r.pt}»</p>
+              <p className={styles.respEs} lang="es">{r.es}</p>
             </div>
           ))}
         </div>
@@ -167,30 +168,28 @@ export default function Mensajes() {
         </section>
       ) : (
         <>
-          <nav className={styles.chips} aria-label="Categorías">
-            {BLOQUES.map(b => (
-              <button key={b.id} type="button"
-                className={`${styles.chip} ${vista === b.id ? styles.chipActivo : ''}`}
-                onClick={() => setVista(b.id)}>
-                <span>{b.emoji}</span> {b.titulo}
+          <nav className={styles.rubros} aria-label="Categorías">
+            {[
+              ...BLOQUES.map(b => ({ id: b.id, titulo: b.titulo, sub: `${b.secciones.reduce((n, s) => n + s.mensajes.length, 0)} mensajes` })),
+              { id: 'conversacion', titulo: 'Conversación completa', sub: 'Ejemplo de principio a fin' },
+              { id: 'glosario', titulo: 'Glosario', sub: `${GLOSARIO.length} términos` },
+            ].map(r => (
+              <button key={r.id} type="button"
+                className={`${styles.rubro} ${vista === r.id ? styles.rubroActivo : ''}`}
+                onClick={() => setVista(r.id)}>
+                <span className={styles.rubroIcono}><IconoRubro id={r.id} size={22} /></span>
+                <span className={styles.rubroTxt}>
+                  <strong>{r.titulo}</strong>
+                  <small>{r.sub}</small>
+                </span>
               </button>
             ))}
-            <button type="button"
-              className={`${styles.chip} ${vista === 'conversacion' ? styles.chipActivo : ''}`}
-              onClick={() => setVista('conversacion')}>
-              <span>💬</span> Conversación completa de ejemplo
-            </button>
-            <button type="button"
-              className={`${styles.chip} ${vista === 'glosario' ? styles.chipActivo : ''}`}
-              onClick={() => setVista('glosario')}>
-              <span>📖</span> Glosario
-            </button>
           </nav>
 
           {bloque && (
             <section>
               <div className={styles.bloqueInfo}>
-                <h2>{bloque.emoji} {bloque.titulo}</h2>
+                <h2><IconoRubro id={bloque.id} size={24} /> {bloque.titulo}</h2>
                 <p>{bloque.descripcion}</p>
                 {bloque.cubre && <p className={styles.cubre}><strong>Sirve para:</strong> {bloque.cubre}</p>}
                 {bloque.id !== 'paso-a-paso' && (
@@ -215,7 +214,7 @@ export default function Mensajes() {
           {vista === 'conversacion' && (
             <section>
               <div className={styles.bloqueInfo}>
-                <h2>💬 Conversación completa de ejemplo</h2>
+                <h2><IconoRubro id="conversacion" size={24} /> Conversación completa de ejemplo</h2>
                 <p>Así se ve una negociación real de principio a fin: saludo, precio, descuento, pago seguro, envío a la frontera y recompra.</p>
               </div>
               <div className={styles.chat}>
@@ -223,8 +222,8 @@ export default function Mensajes() {
                   <div key={i} className={`${styles.linea} ${l.quien === 'yo' ? styles.yo : styles.prov}`}>
                     <span className={styles.quien}>{l.quien === 'yo' ? 'Usted' : 'Proveedor'}</span>
                     <div className={styles.globo}>
-                      <p className={styles.pt}><ConCampos texto={l.pt} /></p>
-                      <p className={styles.globoEs}>{l.es}</p>
+                      <p className={styles.pt} lang="pt-BR"><ConCampos texto={l.pt} /></p>
+                      <p className={styles.globoEs} lang="es">{l.es}</p>
                       {l.quien === 'yo' && <BotonCopiar texto={l.pt} chico />}
                     </div>
                     {l.nota && <p className={styles.nota}><FaLightbulb /> {l.nota}</p>}
@@ -237,7 +236,7 @@ export default function Mensajes() {
           {vista === 'glosario' && (
             <section>
               <div className={styles.bloqueInfo}>
-                <h2>📖 Glosario</h2>
+                <h2><IconoRubro id="glosario" size={24} /> Glosario</h2>
                 <p>Palabras que el proveedor brasileño va a usar y qué significan.</p>
               </div>
               <div className={styles.glosario}>

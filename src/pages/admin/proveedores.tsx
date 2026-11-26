@@ -4,7 +4,7 @@ import { collection, getDocs, addDoc, doc, deleteDoc, updateDoc, query, orderBy,
 import Papa from 'papaparse';
 import toast from 'react-hot-toast';
 import { FaUpload, FaPlus, FaTrash, FaEdit, FaDownload, FaTimes, FaGoogle, FaInstagram, FaFacebook, FaGlobe } from 'react-icons/fa';
-import { FiRefreshCw, FiExternalLink } from 'react-icons/fi';
+import { FiRefreshCw, FiExternalLink, FiAlertTriangle, FiCheck, FiX } from 'react-icons/fi';
 import { db } from '@/lib/firebase';
 import { CATEGORIAS_DEFAULT, CSV_HEADERS, slugify, Categoria, agrupar } from '@/lib/categorias';
 import { FaTags } from 'react-icons/fa';
@@ -382,7 +382,7 @@ export default function AdminProveedores() {
   // ===== Eliminar TODOS los proveedores =====
   const eliminarTodos = async () => {
     if (proveedores.length === 0) { toast.error('No hay proveedores'); return; }
-    if (!confirm(`⚠️ ¿Eliminar los ${proveedores.length} proveedores? Esta acción NO se puede deshacer.`)) return;
+    if (!confirm(`¿Eliminar los ${proveedores.length} proveedores? Esta acción NO se puede deshacer.`)) return;
     if (!confirm(`Confirmá una vez más: se van a borrar ${proveedores.length} proveedores. ¿Seguro?`)) return;
     setBorrando(true);
     try {
@@ -659,10 +659,10 @@ export default function AdminProveedores() {
           </select>
           <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value as any)} style={{ width: 220 }}>
             <option value="todos">Todos los estados</option>
-            <option value="incompletos">⏳ Faltan finalizar ({nIncompletos})</option>
-            <option value="completos">✅ Finalizados ({nCompletos})</option>
-            <option value="online">🟢 Online / Público ({nOnline})</option>
-            <option value="off">⚫ Off / No público ({nOff})</option>
+            <option value="incompletos">Faltan finalizar ({nIncompletos})</option>
+            <option value="completos">Finalizados ({nCompletos})</option>
+            <option value="online">Online / Público ({nOnline})</option>
+            <option value="off">Off / No público ({nOff})</option>
           </select>
         </div>
 
@@ -670,10 +670,10 @@ export default function AdminProveedores() {
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16, fontSize: 12 }}>
           {[
             { k: 'todos', txt: `Total: ${enCat.length}` },
-            { k: 'incompletos', txt: `⏳ Faltan: ${nIncompletos}` },
-            { k: 'completos', txt: `✅ Listos: ${nCompletos}` },
-            { k: 'online', txt: `🟢 Online: ${nOnline}` },
-            { k: 'off', txt: `⚫ Off: ${nOff}` },
+            { k: 'incompletos', txt: `Faltan: ${nIncompletos}` },
+            { k: 'completos', txt: `Listos: ${nCompletos}` },
+            { k: 'online', txt: `Online: ${nOnline}` },
+            { k: 'off', txt: `Off: ${nOff}` },
           ].map(chip => (
             <button
               key={chip.k}
@@ -728,7 +728,7 @@ export default function AdminProveedores() {
               onClick={() => setCanales({ ig: false, fb: false, web: false })}
               style={{ padding: '5px 10px', borderRadius: 20, cursor: 'pointer', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-mut)' }}
             >
-              ✕ Limpiar
+              <FiX style={{ verticalAlign: '-2px' }} /> Limpiar
             </button>
           )}
         </div>
@@ -788,7 +788,7 @@ export default function AdminProveedores() {
                           className={`${styles.badge} ${p.esSecreto ? styles.badgeAdmin : styles.badgePagado}`}
                           style={{ cursor: 'pointer', border: 'none' }}
                         >
-                          {p.esSecreto ? '⚫ Off' : '🟢 Online'}
+                          {p.esSecreto ? 'Off' : 'Online'}
                         </button>
                       </td>
                       <td>
@@ -919,7 +919,7 @@ export default function AdminProveedores() {
                 <div className={styles.formField}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <input type="checkbox" checked={!!form.completo} onChange={e => setForm({ ...form, completo: e.target.checked })} style={{ width: 'auto' }} />
-                    <span>✅ Completo (finalizado)</span>
+                    <span>Completo (finalizado)</span>
                   </label>
                 </div>
               </div>
@@ -1015,7 +1015,7 @@ export default function AdminProveedores() {
               </div>
 
               <p style={{ background: 'rgba(245,181,68,.08)', border: '1px solid rgba(245,181,68,.25)', color: 'var(--oro)', fontSize: 12, padding: 10, borderRadius: 8, marginTop: 14, lineHeight: 1.5 }}>
-                ⚠️ La sincronización <strong>actualiza</strong> los proveedores existentes (por nombre) y <strong>crea</strong> los nuevos. <strong>No borra</strong> los que no estén en la planilla.
+                <FiAlertTriangle style={{ verticalAlign: '-2px', marginRight: 4 }} />La sincronización <strong>actualiza</strong> los proveedores existentes (por nombre) y <strong>crea</strong> los nuevos. <strong>No borra</strong> los que no estén en la planilla.
               </p>
             </div>
             <div className={styles.modalFooter}>
@@ -1077,7 +1077,7 @@ export default function AdminProveedores() {
                             autoFocus
                             style={{ flex: 1 }}
                           />
-                          <button onClick={guardarEdicionCat} disabled={catsSaving} className={`${styles.btnSm}`} title="Guardar">✓</button>
+                          <button onClick={guardarEdicionCat} disabled={catsSaving} className={`${styles.btnSm}`} title="Guardar"><FiCheck /></button>
                           <button onClick={() => { setEditCatId(null); setEditCatLabel(''); }} className={`${styles.btnSm} ${styles.btnSmGhost}`} title="Cancelar"><FaTimes /></button>
                         </>
                       ) : (
@@ -1100,7 +1100,7 @@ export default function AdminProveedores() {
               </div>
 
               <p style={{ background: 'rgba(245,181,68,.08)', border: '1px solid rgba(245,181,68,.25)', color: 'var(--oro)', fontSize: 12, padding: 10, borderRadius: 8, marginTop: 14, lineHeight: 1.5 }}>
-                ⚠️ Si borrás una categoría que tiene proveedores, esos proveedores quedan sin categoría (no se borran). Reasignálos editándolos.
+                <FiAlertTriangle style={{ verticalAlign: '-2px', marginRight: 4 }} />Si borrás una categoría que tiene proveedores, esos proveedores quedan sin categoría (no se borran). Reasignálos editándolos.
               </p>
             </div>
           </div>

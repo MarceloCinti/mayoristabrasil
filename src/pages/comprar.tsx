@@ -82,7 +82,7 @@ export default function Comprar() {
           </div>
 
           <Link href="/afiliacion" className={styles.afiliadoCta}>
-            💸 ¿No querés comprar? <strong>Ganá dinero como afiliado →</strong>
+            ¿No querés comprar? <strong>Ganá dinero como afiliado →</strong>
           </Link>
 
           <p className={styles.logout}>

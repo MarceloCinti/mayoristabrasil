@@ -2,7 +2,7 @@ import Head from 'next/head';
 import { useEffect, useState, FormEvent } from 'react';
 import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
 import toast from 'react-hot-toast';
-import { FaPlus, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaTimes, FaLink, FaPaperclip } from 'react-icons/fa';
 import { db } from '@/lib/firebase';
 import { useAdminGuard } from '@/hooks/useAdminGuard';
 import AdminLayout from '@/components/admin/AdminLayout';
@@ -119,8 +119,8 @@ export default function AdminBonos() {
                   <td>{b.numero}</td>
                   <td><strong>{b.titulo}</strong><br /><span style={{ color: 'var(--text-mut)', fontSize: 12 }}>{b.descripcion}</span></td>
                   <td>
-                    {b.enlace && <span style={{ fontSize: 12, color: 'var(--br-verde)' }}>🔗 enlace</span>}
-                    {b.archivo && <span style={{ fontSize: 12, color: 'var(--br-azul)', marginLeft: 8 }}>📎 archivo</span>}
+                    {b.enlace && <span style={{ fontSize: 12, color: 'var(--br-verde)', display: 'inline-flex', alignItems: 'center', gap: 4 }}><FaLink /> enlace</span>}
+                    {b.archivo && <span style={{ fontSize: 12, color: 'var(--br-azul)', marginLeft: 8, display: 'inline-flex', alignItems: 'center', gap: 4 }}><FaPaperclip /> archivo</span>}
                     {!b.enlace && !b.archivo && <span style={{ fontSize: 12, color: 'var(--text-mut)' }}>—</span>}
                   </td>
                   <td>

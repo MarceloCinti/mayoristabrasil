@@ -17,6 +17,7 @@ import Foto from '@/components/Foto';
 import BannerArte from '@/components/BannerArte';
 import ActividadLateral from '@/components/ActividadLateral';
 import { apodoDe } from '@/lib/nickname';
+import Avatar from '@/components/Avatar';
 import styles from './index.module.css';
 
 const TIPS = [
@@ -212,7 +213,7 @@ export default function Dashboard() {
         <span className={styles.heroBrilho} />
         <div className={styles.heroTexto}>
           <span className={styles.heroPill}><span className={styles.pulso} /> Base actualizada</span>
-          <h1>Hola, <span className={styles.grad}>{apodoDe(userData)}</span></h1>
+          <h1 className={styles.hola}><Link href="/dashboard/perfil" title="Cambiar mi avatar"><Avatar valor={userData?.avatar} clave={userData?.uid || ''} size={46} className={styles.holaAvatar} /></Link> Hola, <span className={styles.grad}>{apodoDe(userData)}</span></h1>
           <p>Tu central para comprar en Brasil y revender en Paraguay.</p>
         </div>
         <div className={styles.heroStats}>

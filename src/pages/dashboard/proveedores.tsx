@@ -9,6 +9,7 @@ import { useCategorias } from '@/lib/useCategorias';
 import { Proveedor, Resena, EstadoFav } from '@/lib/proveedorTypes';
 import { useAuth } from '@/context/AuthContext';
 import { apodoDe } from '@/lib/nickname';
+import { avatarDe } from '@/lib/avatar';
 import { usePagoGuard } from '@/hooks/usePagoGuard';
 import DashboardLayout from '@/components/DashboardLayout';
 import ProveedorCard from '@/components/ProveedorCard';
@@ -86,7 +87,7 @@ export default function Proveedores() {
     if (!user) return;
     const resena: Resena = {
       id: `${user.uid}_${p.id}`, proveedorId: p.id, uid: user.uid,
-      nombre: apodoDe(userData), nickname: apodoDe(userData), texto, estrellas,
+      nombre: apodoDe(userData), nickname: apodoDe(userData), avatar: avatarDe(userData?.avatar, user.uid), texto, estrellas,
     };
     await setDoc(doc(db, 'resenas', resena.id), { ...resena, createdAt: serverTimestamp() });
     setResenasMap(prev => {
@@ -109,7 +110,7 @@ export default function Proveedores() {
 
   const addRespuesta = async (r: Resena, texto: string) => {
     if (!user) return;
-    const resp = { uid: user.uid, nombre: apodoDe(userData), nickname: apodoDe(userData), texto, ts: Date.now() };
+    const resp = { uid: user.uid, nombre: apodoDe(userData), nickname: apodoDe(userData), avatar: avatarDe(userData?.avatar, user.uid), texto, ts: Date.now() };
     await updateDoc(doc(db, 'resenas', r.id), { respuestas: arrayUnion(resp) });
     setResenasMap(prev => ({
       ...prev,

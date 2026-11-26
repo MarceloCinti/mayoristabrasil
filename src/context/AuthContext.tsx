@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState, useRef } from 'r
 import { User, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, signOut } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { sugerirApodo } from '@/lib/nickname';
+import { avatarAleatorio } from '@/lib/avatar';
 import { auth, db, googleProvider, ADMIN_EMAIL } from '@/lib/firebase';
 
 interface UserData {
@@ -11,6 +12,7 @@ interface UserData {
   nombre: string;
   // Apodo público (comentarios, foro). Nosotros tratamos al cliente por `nombre`.
   nickname?: string;
+  avatar?: string;   // "forma.color.figura" (ver src/lib/avatar.ts)
   pago: boolean;
   fechaCompra: any;
   esAdmin: boolean;
@@ -89,9 +91,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (snap.exists()) {
           const d = snap.data() as UserData;
           // Cuentas anteriores a los apodos: se les asigna uno la primera vez.
-          if (!d.nickname) {
-            d.nickname = sugerirApodo(d.nombre || '', u.uid);
-            try { await updateDoc(doc(db, 'usuarios', u.uid), { nickname: d.nickname }); } catch (e) { console.error(e); }
+          const falta: Partial<UserData> = {};
+          if (!d.nickname) falta.nickname = sugerirApodo(d.nombre || '', u.uid);
+          if (!d.avatar) falta.avatar = avatarAleatorio(u.uid);
+          if (Object.keys(falta).length) {
+            Object.assign(d, falta);
+            try { await updateDoc(doc(db, 'usuarios', u.uid), falta); } catch (e) { console.error(e); }
           }
           setUserData(d);
         } else {
@@ -100,6 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: u.email,
             nombre: u.displayName || 'Usuario',
             nickname: sugerirApodo(u.displayName || '', u.uid),
+            avatar: avatarAleatorio(u.uid),
             pago: false,
             fechaCompra: null,
             esAdmin: u.email === ADMIN_EMAIL,
@@ -136,6 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: cred.user.email,
       nombre,
       nickname: sugerirApodo(nombre, cred.user.uid),
+      avatar: avatarAleatorio(cred.user.uid),
       pago: false,
       fechaCompra: null,
       esAdmin: cred.user.email === ADMIN_EMAIL,

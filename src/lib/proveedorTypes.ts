@@ -30,6 +30,7 @@ export interface Respuesta {
   uid: string;
   nombre: string;      // apodo del autor (desde nov/2026 nunca el nombre real)
   nickname?: string;
+  avatar?: string;
   texto: string;
   ts: number;
 }
@@ -40,6 +41,7 @@ export interface Resena {
   uid: string;
   nombre: string;      // apodo del autor (desde nov/2026 nunca el nombre real)
   nickname?: string;
+  avatar?: string;
   texto: string;
   estrellas: number;
   createdAt?: any;

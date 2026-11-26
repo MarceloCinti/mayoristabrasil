@@ -40,3 +40,7 @@
 .optionSel svg { color: var(--verde); }
 
 .actions { display: flex; gap: 12px; margin-top: 12px; }
+
+/* Apodo + avatar (último paso) */
+.identidad { margin: 22px 0 6px; padding: 18px; border-radius: 16px; background: var(--bg-2); border: 1px solid var(--border); }
+.identidad h2 { font-size: 18px; margin-bottom: 2px; }

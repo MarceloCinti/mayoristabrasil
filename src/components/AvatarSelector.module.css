@@ -1,0 +1,20 @@
+.sel { display: flex; flex-direction: column; gap: 8px; }
+.topo { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; }
+.grande { animation: entra .35s cubic-bezier(.3,1.6,.5,1); box-shadow: 0 12px 26px -14px rgba(29,63,148,.6); }
+@keyframes entra { from { transform: scale(.85); } to { transform: scale(1); } }
+.sorteio { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; background: var(--azul-tint); color: var(--azul); border: 1px solid rgba(29,63,148,.2); }
+.sorteio:hover { background: #dbe6f7; }
+.titulo { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 12px; font-weight: 700; color: var(--text-mut); text-transform: uppercase; letter-spacing: .05em; margin-top: 8px; }
+.linha { display: flex; flex-wrap: wrap; gap: 8px; }
+.op { padding: 3px; border-radius: 12px; border: 2px solid transparent; display: inline-flex; transition: transform .2s cubic-bezier(.3,1.6,.5,1); }
+.op:hover { transform: scale(1.08); }
+.cor { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 1px var(--border-strong); transition: transform .2s cubic-bezier(.3,1.6,.5,1); }
+.cor:hover { transform: scale(1.12); }
+.cor.on { box-shadow: 0 0 0 2px var(--text); }
+.op.on, .fig.on { border-color: var(--brand); background: var(--brand-tint); }
+.abas { display: inline-flex; gap: 4px; text-transform: none; letter-spacing: 0; }
+.abas button { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--text-mut); background: var(--bg-elev); }
+.abas .abaOn { background: var(--azul); color: #fff; }
+.figuras { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 6px; }
+.fig { height: 40px; border-radius: 10px; border: 2px solid transparent; background: var(--bg-2); color: var(--azul-deep); font-size: 20px; display: flex; align-items: center; justify-content: center; transition: transform .2s cubic-bezier(.3,1.6,.5,1), background .2s; }
+.fig:hover { transform: scale(1.1); background: var(--bg-elev); }

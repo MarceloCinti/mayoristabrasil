@@ -4,6 +4,7 @@ import { FiHeart, FiTrendingUp, FiStar, FiX, FiImage, FiThumbsUp, FiCornerDownRi
 import { useCategorias } from '@/lib/useCategorias';
 import { Proveedor, Resena, Respuesta, EstadoFav, ESTADOS_FAV, contactoDe } from '@/lib/proveedorTypes';
 import Foto from './Foto';
+import Avatar from './Avatar';
 import styles from './ProveedorCard.module.css';
 
 interface Props {
@@ -238,7 +239,7 @@ function Modal({ p, cat, estadoFav, resenas, avg, miResena, miUid, wppLink, telL
               return (
               <div key={r.id} className={styles.comentario}>
                 <div className={styles.comHead}>
-                  <span className={styles.comAvatar}>{(r.nickname || r.nombre || 'M').charAt(0).toUpperCase()}</span>
+                  <Avatar valor={r.avatar} clave={r.uid} size={34} />
                   <div>
                     <strong>{r.nickname || r.nombre}</strong>
                     <Estrellas valor={r.estrellas} size={11} />
@@ -260,7 +261,7 @@ function Modal({ p, cat, estadoFav, resenas, avg, miResena, miUid, wppLink, telL
                   <div className={styles.respuestas}>
                     {(r.respuestas || []).map((rp: Respuesta, i: number) => (
                       <div key={i} className={styles.respuesta}>
-                        <span className={styles.comAvatarSm}>{(rp.nombre || 'U').charAt(0)}</span>
+                        <Avatar valor={rp.avatar} clave={rp.uid} size={26} />
                         <div><strong>{rp.nickname || rp.nombre}</strong><p>{rp.texto}</p></div>
                       </div>
                     ))}

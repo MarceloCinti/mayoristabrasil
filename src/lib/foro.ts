@@ -6,6 +6,7 @@ export interface ForoTema {
   id: string;
   uid: string;
   apodo: string;
+  avatar?: string;
   titulo: string;
   texto: string;
   categoria: string;
@@ -20,6 +21,7 @@ export interface ForoRespuesta {
   temaId: string;
   uid: string;
   apodo: string;
+  avatar?: string;
   texto: string;
   createdAt?: any;
   likes?: string[];

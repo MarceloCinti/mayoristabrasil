@@ -9,6 +9,9 @@ import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 import { PROFESIONES } from '@/lib/perfil';
 import { DEPARTAMENTOS, CIUDADES, GENEROS } from '@/lib/paraguay';
+import { apodoDe, sugerirApodo, validarApodo } from '@/lib/nickname';
+import { avatarDe } from '@/lib/avatar';
+import AvatarSelector from '@/components/AvatarSelector';
 import styles from './completar-perfil.module.css';
 
 export default function CompletarPerfil() {
@@ -25,6 +28,8 @@ export default function CompletarPerfil() {
   const [profesion, setProfesion] = useState('');
   const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [genero, setGenero] = useState('');
+  const [apodo, setApodo] = useState('');
+  const [avatar, setAvatar] = useState('');
 
   useEffect(() => {
     if (loading) return;
@@ -38,6 +43,8 @@ export default function CompletarPerfil() {
       setProfesion(userData.profesion || '');
       setFechaNacimiento(userData.fechaNacimiento || '');
       setGenero(userData.genero || '');
+      setApodo(a => a || apodoDe(userData));
+      setAvatar(v => v || avatarDe(userData.avatar, userData.uid));
     }
   }, [user, userData, loading, router]);
 
@@ -61,6 +68,8 @@ export default function CompletarPerfil() {
     if (!fechaNacimiento) { toast.error('Ingresá tu fecha de nacimiento'); return; }
     if (!genero) { toast.error('Seleccioná tu género'); return; }
     if (!profesion) { toast.error('Seleccioná tu profesión'); return; }
+    const errApodo = validarApodo(apodo, userData?.nombre || '');
+    if (errApodo) { toast.error(errApodo); return; }
     if (!user) return;
     setSaving(true);
     try {
@@ -72,6 +81,8 @@ export default function CompletarPerfil() {
         profesion,
         fechaNacimiento,
         genero,
+        nickname: apodo.trim(),
+        avatar,
         perfilCompleto: true,
       });
       await refreshUserData();
@@ -146,6 +157,21 @@ export default function CompletarPerfil() {
               <div className={styles.field}>
                 <label>Nombre de tu local o comercio <span className={styles.opt}>(opcional)</span></label>
                 <input placeholder="Ej: Boutique Lorena" value={comercio} onChange={e => setComercio(e.target.value)} />
+              </div>
+
+              <div className={styles.identidad}>
+                <h2>Tu identidad en la comunidad</h2>
+                <p className={styles.sub}>En comentarios y en el foro aparecés con tu apodo y tu avatar, nunca con tu nombre.</p>
+                <div className={styles.field}>
+                  <label>Apodo</label>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input value={apodo} maxLength={20} onChange={e => setApodo(e.target.value.replace(/\s/g, ''))} />
+                    <button type="button" className="btn btn-secondary" style={{ padding: '0 14px', flexShrink: 0 }}
+                      onClick={() => setApodo(sugerirApodo(userData?.nombre || '', `${user?.uid}-${Date.now()}`))}>Otro</button>
+                  </div>
+                  {apodo && validarApodo(apodo, userData?.nombre || '') && <p style={{ color: 'var(--perigo)', fontSize: 12.5, marginTop: 6 }}>{validarApodo(apodo, userData?.nombre || '')}</p>}
+                </div>
+                <AvatarSelector valor={avatar} clave={user?.uid || ''} onChange={setAvatar} />
               </div>
 
               <div className={styles.actions}>

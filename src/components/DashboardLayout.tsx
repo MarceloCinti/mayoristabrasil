@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FaStore, FaUserSecret, FaTruck, FaFire, FaShieldAlt, FaGift, FaSignOutAlt, FaBars, FaTimes, FaCog, FaHandshake, FaHeart, FaExchangeAlt, FaComments, FaPen } from 'react-icons/fa';
 import { apodoDe } from '@/lib/nickname';
+import Avatar from './Avatar';
 import { useAuth } from '@/context/AuthContext';
 import { useContadorClics } from '@/hooks/useTrial';
 import { trialUsados, TRIAL_LIMITE } from '@/lib/trial';
@@ -112,8 +113,11 @@ export default function DashboardLayout({ children, lateral }: { children: React
             </Link>
           )}
           <Link href="/dashboard/perfil" className={styles.userBox} title="Cambiar mi apodo" onClick={() => setOpen(false)}>
-            <div className={styles.userName}>{apodoDe(userData)} <FaPen className={styles.userPen} /></div>
-            <div className={styles.userEmail}>{userData?.email}</div>
+            <Avatar valor={userData?.avatar} clave={userData?.uid || ''} size={36} />
+            <div style={{ minWidth: 0 }}>
+              <div className={styles.userName}>{apodoDe(userData)} <FaPen className={styles.userPen} /></div>
+              <div className={styles.userEmail}>{userData?.email}</div>
+            </div>
           </Link>
           <button onClick={handleLogout} className={`${styles.logout} menuFx`}>
             <FaSignOutAlt /> Cerrar sesión

@@ -1,0 +1,12 @@
+.av {
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  color: #fff; line-height: 1;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,.12);
+}
+.av svg { filter: drop-shadow(0 1px 1px rgba(0,0,0,.18)); }
+.f_circulo  { border-radius: 50%; }
+.f_cuadrado { border-radius: 26%; }
+.f_hexagono { clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0 50%); box-shadow: none; }
+.f_gota     { border-radius: 50% 50% 50% 8%; }
+.f_flor     { border-radius: 42% 58% 38% 62% / 55% 40% 60% 45%; }
+.f_rombo    { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); box-shadow: none; }

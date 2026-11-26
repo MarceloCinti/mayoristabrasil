@@ -1,17 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  FiMessageCircle, FiHeart, FiRefreshCw, FiAward, FiPlayCircle, FiBookmark,
-  FiMessageSquare, FiPhone, FiUserPlus, FiStar,
-} from 'react-icons/fi';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { candidatos, semilla } from '@/lib/nickname';
+import { avatarAleatorio } from '@/lib/avatar';
+import Avatar from './Avatar';
 import styles from './ActividadLateral.module.css';
 
 /**
- * Barra derecha del Inicio: actividad de la comunidad subiendo, siempre por
- * APODO (discreción). Los 1000 apodos se generan con el mismo estilo de las
- * sugerencias reales (guaraní + raíz de apellido); los proveedores citados se
- * eligen al azar entre los proveedores reales que el Inicio ya cargó.
+ * Barra derecha del Inicio: actividad de la comunidad subiendo de forma
+ * continua (como las estrellas cayendo, pero hacia arriba), siempre por
+ * APODO + avatar. Los 1000 apodos siguen el estilo de las sugerencias
+ * reales (guaraní + raíz de apellido); los proveedores citados se eligen al
+ * azar entre los reales que el Inicio ya cargó.
+ *
+ * Movimiento: un requestAnimationFrame corre la columna hacia arriba a
+ * velocidad constante (sin re-render por cuadro). Cuando la primera línea
+ * sale por arriba, se quita y entra una nueva abajo.
  */
 
 const APELLIDOS = [
@@ -35,12 +37,8 @@ const TIPOS: { tipo: Tipo; peso: number; prov: boolean }[] = [
   { tipo: 'union', peso: 6, prov: false },
   { tipo: 'resena', peso: 6, prov: true },
 ];
-const ICONE: Record<Tipo, JSX.Element> = {
-  comento: <FiMessageCircle />, like: <FiHeart />, cambio: <FiRefreshCw />, curso: <FiAward />, modulo: <FiPlayCircle />,
-  favorito: <FiBookmark />, foro: <FiMessageSquare />, contacto: <FiPhone />, union: <FiUserPlus />, resena: <FiStar />,
-};
 
-interface Evento { id: number; apodo: string; tipo: Tipo; prov: string; modulo: number; desde: number; }
+interface Evento { id: number; apodo: string; avatar: string; tipo: Tipo; prov: string; modulo: number; }
 
 function texto(e: Evento): JSX.Element {
   const P = <b className={styles.prov}>{e.prov}</b>;
@@ -58,27 +56,23 @@ function texto(e: Evento): JSX.Element {
   }
 }
 
-function hace(ms: number) {
-  const s = (Date.now() - ms) / 1000;
-  if (s < 45) return 'ahora';
-  if (s < 3600) return `hace ${Math.max(1, Math.round(s / 60))} min`;
-  return `hace ${Math.round(s / 3600)} h`;
-}
-
 /** 1000 apodos distintos, en orden aleatorio a cada visita. */
 function gerarApodos(rnd: () => number): string[] {
   const set = new Set<string>();
   for (let i = 0; set.size < 1000 && i < 5000; i++) {
     const ap = APELLIDOS[Math.floor(rnd() * APELLIDOS.length)];
     for (const c of candidatos(`X ${ap}`, semilla(`feed${i}`))) {
-      // mayoría de juegos de palabras con apellido; pocos con número
-      if (/\d/.test(c) && rnd() > .15) continue;
+      // solo juegos de palabras con apellido (sin números)
+      if (/\d/.test(c)) continue;
       set.add(c);
       if (set.size >= 1000) break;
     }
   }
   return [...set].sort(() => rnd() - .5);
 }
+
+const VELOCIDADE = 22;  // px por segundo
+const LINHAS = 22;      // líneas en pantalla (sobra para cubrir la altura)
 
 export default function ActividadLateral({ proveedores }: { proveedores: string[] }) {
   const rnd = useMemo(() => semilla(String(Math.random())), []);
@@ -88,7 +82,7 @@ export default function ActividadLateral({ proveedores }: { proveedores: string[
   const provs = useRef<string[]>([]);
   provs.current = proveedores;
 
-  const criar = (desde: number): Evento => {
+  const criar = (): Evento => {
     const i = pos.current++ % apodos.length;
     let r = rnd() * pesoTotal;
     let t = TIPOS[0];
@@ -96,61 +90,72 @@ export default function ActividadLateral({ proveedores }: { proveedores: string[
     const lista = provs.current;
     if (t.prov && !lista.length) t = TIPOS.find(x => !x.prov)!;
     return {
-      id: pos.current, apodo: apodos[i], tipo: t.tipo,
+      id: pos.current, apodo: apodos[i], avatar: avatarAleatorio(apodos[i]), tipo: t.tipo,
       prov: lista.length ? lista[Math.floor(rnd() * lista.length)] : '',
-      modulo: 1 + Math.floor(rnd() * 7), desde,
+      modulo: 1 + Math.floor(rnd() * 7),
     };
   };
 
   const [eventos, setEventos] = useState<Evento[]>([]);
-  const [, setTick] = useState(0);
+  const coluna = useRef<HTMLDivElement>(null);
+  const desloc = useRef(0);
+  const trocando = useRef(false);
+  const pendente = useRef(0);
 
-  // Arranca con unos eventos "de hace un rato" en cuanto hay proveedores
+  // Llena la columna cuando ya hay proveedores para citar
   useEffect(() => {
     if (eventos.length || !proveedores.length) return;
-    // horarios en orden: el de arriba es el más viejo
-    let t = Date.now() - 20000;
-    const antes: Evento[] = [];
-    for (let k = 0; k < 9; k++) { antes.unshift(criar(t)); t -= 50000 + rnd() * 90000; }
-    setEventos(antes.map((e, k) => ({ ...e, id: -100 + k })));
+    setEventos(Array.from({ length: LINHAS }, () => criar()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [proveedores.length]);
 
-  // Un evento nuevo cada 2,5–5 s; quedan los últimos 16
+  // La primera línea ya salió del DOM: descontar su altura en el mismo
+  // cuadro, así la columna no salta.
+  useLayoutEffect(() => {
+    if (!trocando.current) return;
+    desloc.current -= pendente.current;
+    if (coluna.current) coluna.current.style.transform = `translate3d(0, ${-desloc.current}px, 0)`;
+    trocando.current = false;
+  }, [eventos]);
+
   useEffect(() => {
-    let t: ReturnType<typeof setTimeout>;
-    const proximo = () => {
-      t = setTimeout(() => {
-        setEventos(ev => [...ev, criar(Date.now())].slice(-16));
-        proximo();
-      }, 2500 + rnd() * 2500);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let raf = 0;
+    let antes = performance.now();
+    const passo = (agora: number) => {
+      const dt = Math.min(64, agora - antes) / 1000;
+      antes = agora;
+      const col = coluna.current;
+      if (col && col.firstElementChild && !trocando.current) {
+        desloc.current += VELOCIDADE * dt;
+        const primeira = col.firstElementChild as HTMLElement;
+        const alto = primeira.offsetHeight + 14; // + gap
+        if (desloc.current >= alto) {
+          pendente.current = alto;
+          trocando.current = true;
+          setEventos(ev => [...ev.slice(1), criar()]);
+        }
+        col.style.transform = `translate3d(0, ${-desloc.current}px, 0)`;
+      }
+      raf = requestAnimationFrame(passo);
     };
-    proximo();
-    const relogio = setInterval(() => setTick(x => x + 1), 30000);
-    return () => { clearTimeout(t); clearInterval(relogio); };
+    raf = requestAnimationFrame(passo);
+    return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <aside className={styles.barra} aria-label="Actividad de la comunidad">
-      <div className={styles.topo}>
-        <span className={styles.vivo} /> Actividad en vivo
-      </div>
-      <div className={styles.fluxo}>
-        <AnimatePresence initial={false}>
+      <div className={styles.topo}><span className={styles.vivo} /> Actividad en vivo</div>
+      <div className={styles.janela}>
+        <div ref={coluna} className={styles.coluna}>
           {eventos.map(e => (
-            <motion.div key={e.id} layout className={`${styles.item} ${styles['t_' + e.tipo]}`}
-              initial={{ opacity: 0, y: 40, scale: .95 }} animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -30, transition: { duration: .4 } }}
-              transition={{ type: 'spring', stiffness: 260, damping: 28 }}>
-              <span className={styles.ico}>{ICONE[e.tipo]}</span>
-              <div className={styles.txt}>
-                <b className={styles.apodo}>{e.apodo}</b> {texto(e)}
-                <small>{hace(e.desde)}</small>
-              </div>
-            </motion.div>
+            <div key={e.id} className={styles.linha}>
+              <Avatar valor={e.avatar} size={26} />
+              <p><b className={styles.apodo}>{e.apodo}</b> {texto(e)}</p>
+            </div>
           ))}
-        </AnimatePresence>
+        </div>
       </div>
     </aside>
   );

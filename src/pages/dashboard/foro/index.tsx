@@ -11,6 +11,8 @@ import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 import { usePagoGuard } from '@/hooks/usePagoGuard';
 import { apodoDe } from '@/lib/nickname';
+import { avatarDe } from '@/lib/avatar';
+import Avatar from '@/components/Avatar';
 import { CATEGORIAS_FORO, ForoTema, haceCuanto, labelCategoriaForo, LIMITE_TEXTO, LIMITE_TITULO } from '@/lib/foro';
 import DashboardLayout from '@/components/DashboardLayout';
 import styles from './foro.module.css';
@@ -52,7 +54,7 @@ export default function Foro() {
     setEnviando(true);
     try {
       const ref = await addDoc(collection(db, 'foroTemas'), {
-        uid: user.uid, apodo: apodoDe(userData), titulo: titulo.trim().slice(0, LIMITE_TITULO),
+        uid: user.uid, apodo: apodoDe(userData), avatar: avatarDe(userData.avatar, user.uid), titulo: titulo.trim().slice(0, LIMITE_TITULO),
         texto: texto.trim().slice(0, LIMITE_TEXTO), categoria: catNuevo,
         createdAt: serverTimestamp(), ultimaEn: serverTimestamp(), respuestas: 0, likes: [],
       });
@@ -99,7 +101,7 @@ export default function Foro() {
         {lista.map((t, k) => (
           <motion.div key={t.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(k, 10) * .04 }}>
             <Link href={`/dashboard/foro/${t.id}`} className={`${styles.tema} cardFx`}>
-              <span className={styles.avatar}>{(t.apodo || 'M').charAt(0).toUpperCase()}</span>
+              <Avatar valor={t.avatar} clave={t.uid} size={42} />
               <div className={styles.temaCorpo}>
                 <div className={styles.meta}>
                   <span className={styles.tag}>{labelCategoriaForo(t.categoria)}</span>

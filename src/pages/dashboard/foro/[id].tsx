@@ -13,6 +13,8 @@ import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 import { usePagoGuard } from '@/hooks/usePagoGuard';
 import { apodoDe } from '@/lib/nickname';
+import { avatarDe } from '@/lib/avatar';
+import Avatar from '@/components/Avatar';
 import { ForoRespuesta, ForoTema, haceCuanto, labelCategoriaForo, LIMITE_TEXTO } from '@/lib/foro';
 import DashboardLayout from '@/components/DashboardLayout';
 import styles from './foro.module.css';
@@ -68,7 +70,7 @@ export default function TemaForo() {
     if (texto.trim().length < 2) return;
     setEnviando(true);
     try {
-      const nova = { temaId: tema.id, uid: user.uid, apodo: apodoDe(userData), texto: texto.trim().slice(0, LIMITE_TEXTO), createdAt: serverTimestamp(), likes: [] };
+      const nova = { temaId: tema.id, uid: user.uid, apodo: apodoDe(userData), avatar: avatarDe(userData.avatar, user.uid), texto: texto.trim().slice(0, LIMITE_TEXTO), createdAt: serverTimestamp(), likes: [] };
       const ref = await addDoc(collection(db, 'foroRespuestas'), nova);
       setResps(rs => [...rs, { ...nova, id: ref.id, createdAt: { toMillis: () => Date.now() } } as ForoRespuesta]);
       setTexto('');
@@ -109,7 +111,7 @@ export default function TemaForo() {
           <motion.article className={styles.post} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
             <div className={styles.meta}>
               <span className={styles.tag}>{labelCategoriaForo(tema.categoria)}</span>
-              <span className={styles.avatarMini}>{(tema.apodo || 'M').charAt(0).toUpperCase()}</span>
+              <Avatar valor={tema.avatar} clave={tema.uid} size={24} />
               <b>{tema.apodo}</b> · {haceCuanto(tema.createdAt)}
             </div>
             <h1 className={styles.postTitulo}>{tema.titulo}</h1>
@@ -128,7 +130,7 @@ export default function TemaForo() {
           <div className={styles.respostas}>
             {resps.map((r, k) => (
               <motion.div key={r.id} className={styles.resp} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: Math.min(k, 8) * .04 }}>
-                <span className={styles.avatar}>{(r.apodo || 'M').charAt(0).toUpperCase()}</span>
+                <Avatar valor={r.avatar} clave={r.uid} size={38} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className={styles.meta}><b>{r.apodo}</b> · {haceCuanto(r.createdAt)}</div>
                   <p className={styles.postTexto}>{r.texto}</p>

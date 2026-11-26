@@ -1,0 +1,58 @@
+.wrap { position: relative; }
+.fila { display: flex; align-items: center; gap: 2px; }
+.principal { flex: 1; min-width: 0; }
+.principalHover { background: var(--bg-elev); color: var(--text); }
+.icon { display: inline-flex; font-size: 16px; width: 20px; }
+.flechaDesk { margin-left: auto; opacity: .55; font-size: 14px; }
+
+.flechaMovil {
+  display: none;
+  width: 36px; height: 36px; flex-shrink: 0; border-radius: 8px;
+  align-items: center; justify-content: center;
+  color: var(--text-mut); background: transparent; border: none; cursor: pointer;
+}
+.flechaMovil:hover { background: var(--bg-elev); color: var(--text); }
+
+/* ===== Paneles flotantes (escritorio) ===== */
+.panel {
+  position: fixed; z-index: 200;
+  width: 250px; max-height: calc(100vh - 16px); overflow-y: auto;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 6px;
+  box-shadow: 0 18px 48px -12px rgba(29,63,148, .28), 0 2px 6px rgba(0,0,0,.06);
+  display: flex; flex-direction: column; gap: 1px;
+  animation: aparecer .12s ease-out;
+}
+@keyframes aparecer { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
+
+.opcion {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: 8px;
+  color: var(--text); font-size: 13.5px; font-weight: 500;
+}
+.opcion:hover, .opcion.hover { background: var(--bg-elev); }
+.todos { font-weight: 700; color: var(--brand); }
+.panel .todos { border-bottom: 1px solid var(--border); border-radius: 8px 8px 0 0; margin-bottom: 4px; }
+.activa, .activa:hover { background: rgba(18,128,59, .12); color: var(--brand); font-weight: 600; }
+.der { display: inline-flex; align-items: center; gap: 6px; color: var(--text-mut); }
+.count { font-size: 11px; color: var(--text-mut); font-weight: 500; }
+
+/* ===== Acordeón (celular) ===== */
+.acordeon { display: flex; flex-direction: column; padding: 2px 0 6px 18px; }
+.accGrupo {
+  width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; text-align: left;
+  padding: 8px 10px; border-radius: 8px; background: transparent; border: none; cursor: pointer;
+  color: var(--text-mut); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+}
+.accGrupo:hover { background: var(--bg-elev); color: var(--text); }
+.accItems { display: flex; flex-direction: column; padding: 0 0 4px 10px; }
+.accItem {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  padding: 7px 10px; border-radius: 8px; color: var(--text); font-size: 13px;
+}
+.accItem:hover { background: var(--bg-elev); }
+
+@media (max-width: 900px), (hover: none) {
+  .flechaMovil { display: inline-flex; }
+  .flechaDesk { display: none; }
+}

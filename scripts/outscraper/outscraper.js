@@ -805,7 +805,12 @@ async function atualizarStats(db) {
   const [snap, cfg] = await Promise.all([db.collection('proveedores').get(), db.doc('config/categorias').get()]);
   const lista = (cfg.exists && cfg.data().lista) || [];
   const counts = {};
-  snap.docs.forEach(d => { const c = d.data().categoria; counts[c] = (counts[c] || 0) + 1; });
+  const porCategoria = {}; // sem secretos: alimenta o menu lateral do painel
+  snap.docs.forEach(d => {
+    const { categoria: c, esSecreto } = d.data();
+    counts[c] = (counts[c] || 0) + 1;
+    if (!esSecreto) porCategoria[c] = (porCategoria[c] || 0) + 1;
+  });
   const ordem = [], porGrupo = {};
   for (const c of lista) {
     const g = c.grupo || 'Otros';
@@ -813,7 +818,7 @@ async function atualizarStats(db) {
     porGrupo[g] += counts[c.id] || 0;
   }
   const grupos = ordem.map(g => ({ nombre: g, total: porGrupo[g] })).filter(g => g.total > 0);
-  await db.doc('config/stats').set({ proveedores: snap.size, categorias: Object.keys(counts).length, grupos, updatedAt: Date.now() });
+  await db.doc('config/stats').set({ porCategoria, proveedores: snap.size, categorias: Object.keys(counts).length, grupos, updatedAt: Date.now() });
   console.log(`  config/stats: ${snap.size} fornecedores em ${Object.keys(counts).length} categorias.`);
 }
 

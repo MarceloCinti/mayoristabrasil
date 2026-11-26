@@ -27,52 +27,26 @@
   background: var(--bg-card); border: 1px dashed var(--border); border-radius: 14px;
 }
 
-/* ===== Layout con menú lateral agrupado ===== */
-.layout { display: flex; gap: 20px; align-items: flex-start; }
-.sidebar {
-  width: 250px; flex-shrink: 0;
-  position: sticky; top: 16px;
-  max-height: calc(100vh - 32px); overflow-y: auto;
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 14px; padding: 10px;
-  display: flex; flex-direction: column; gap: 2px;
-}
+.layout { display: flex; }
 .main { flex: 1; min-width: 0; }
 
-.todos {
-  width: 100%; text-align: left; padding: 10px 12px; border-radius: 10px;
-  background: transparent; border: none; color: var(--text);
-  font-size: 14px; font-weight: 600; cursor: pointer;
-  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+/* Filtro elegido en el menú lateral (Todos › Moda › Jeans) */
+.filtroActual {
+  display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  margin-top: 12px; padding: 6px 8px 6px 14px; border-radius: 999px;
+  background: rgba(18,128,59, .08); border: 1px solid rgba(18,128,59, .2);
+  font-size: 13.5px; color: var(--text-mut);
 }
-.todos:hover { background: var(--bg-elev); }
-.todosActive { background: var(--br-verde); color: #fff; }
-
-.grp { display: flex; flex-direction: column; }
-.grpHead {
-  width: 100%; text-align: left; padding: 9px 12px; border-radius: 10px;
-  background: transparent; border: none; cursor: pointer;
-  color: var(--text-mut); font-size: 11px; font-weight: 800;
-  text-transform: uppercase; letter-spacing: .05em;
-  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+.filtroActual a:hover { color: var(--brand); text-decoration: underline; }
+.filtroActual svg { font-size: 13px; opacity: .6; }
+.filtroUltimo { color: var(--brand); font-weight: 700; }
+.filtroCount { margin-left: 8px; font-size: 12px; }
+.filtroQuitar {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%; margin-left: 4px;
+  background: var(--bg-card); color: var(--text-mut);
 }
-.grpHead:hover { background: var(--bg-elev); color: var(--text); }
-.grpHead svg { transition: transform .15s; flex-shrink: 0; }
-.grpItems { display: flex; flex-direction: column; gap: 1px; padding: 2px 0 6px; }
-.catBtn {
-  width: 100%; text-align: left; padding: 7px 12px 7px 22px; border-radius: 8px;
-  background: transparent; border: none; color: var(--text-mut);
-  font-size: 13px; font-weight: 500; cursor: pointer;
-  display: flex; justify-content: space-between; align-items: center; gap: 8px;
-}
-.catBtn:hover { background: var(--bg-elev); color: var(--text); }
-.catActive { background: var(--br-verde); color: #fff !important; }
-.catCount { font-size: 11px; opacity: .7; }
-
-@media (max-width: 780px) {
-  .layout { flex-direction: column; }
-  .sidebar { width: 100%; position: static; max-height: 320px; }
-}
+.filtroQuitar:hover { color: var(--brand); text-decoration: none !important; }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
 .card {

@@ -1,17 +1,17 @@
 import { ReactNode, useState, useEffect, MouseEvent as ReactMouseEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FaStore, FaMapMarkedAlt, FaUserSecret, FaTruck, FaFire, FaShieldAlt, FaGift, FaSignOutAlt, FaBars, FaTimes, FaCog, FaHandshake, FaHeart, FaExchangeAlt } from 'react-icons/fa';
+import { FaStore, FaUserSecret, FaTruck, FaFire, FaShieldAlt, FaGift, FaSignOutAlt, FaBars, FaTimes, FaCog, FaHandshake, FaHeart, FaExchangeAlt } from 'react-icons/fa';
 import { useAuth } from '@/context/AuthContext';
 import { useContadorClics } from '@/hooks/useTrial';
 import { trialUsados, TRIAL_LIMITE } from '@/lib/trial';
 import PaywallModal from './PaywallModal';
+import MenuProveedores from './MenuProveedores';
 import styles from './DashboardLayout.module.css';
 
 const NAV = [
   { href: '/dashboard', label: 'Inicio', icon: <FaStore /> },
   { href: '/dashboard/proveedores', label: 'Proveedores', icon: <FaStore /> },
-  { href: '/dashboard/mapa', label: 'Mapa de Brás', icon: <FaMapMarkedAlt /> },
   { href: '/dashboard/secretos', label: 'Proveedores Secretos', icon: <FaUserSecret /> },
   { href: '/dashboard/favoritos', label: 'Favoritos', icon: <FaHeart /> },
   { href: '/cambio', label: 'Cambio R$/Gs', icon: <FaExchangeAlt /> },
@@ -79,6 +79,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
         <nav className={styles.nav}>
           {NAV.map(item => {
+            if (item.href === '/dashboard/proveedores') return (
+              <MenuProveedores key={item.href} icon={item.icon} className={styles.navItem} activeClass={styles.active} onNavigate={() => setOpen(false)} />
+            );
             const active = router.pathname === item.href;
             return (
               <Link key={item.href} href={item.href} className={`${styles.navItem} ${active ? styles.active : ''}`} onClick={() => setOpen(false)}>

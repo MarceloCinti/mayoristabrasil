@@ -138,7 +138,11 @@ export default function AdminProveedores() {
     const grupos = agrupar(categorias)
       .map(g => ({ nombre: g.grupo, total: g.items.reduce((s, c) => s + (counts[c.id] || 0), 0) }))
       .filter(g => g.total > 0);
+    // Conteo por categoría SIN secretos: alimenta el menú lateral en cascata del panel.
+    const porCategoria: Record<string, number> = {};
+    proveedores.forEach(p => { if (!p.esSecreto) porCategoria[p.categoria] = (porCategoria[p.categoria] || 0) + 1; });
     const stats = {
+      porCategoria,
       proveedores: proveedores.length,
       categorias: Object.keys(counts).length,
       grupos,

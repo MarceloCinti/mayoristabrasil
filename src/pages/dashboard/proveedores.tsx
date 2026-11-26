@@ -2,10 +2,10 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState, useMemo } from 'react';
 import { collection, getDocs, query, orderBy, where, doc, setDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from 'firebase/firestore';
-import { FiSearch, FiChevronDown, FiChevronRight } from 'react-icons/fi';
+import Link from 'next/link';
+import { FiSearch, FiChevronRight, FiX } from 'react-icons/fi';
 import { db } from '@/lib/firebase';
 import { useCategorias } from '@/lib/useCategorias';
-import { agrupar } from '@/lib/categorias';
 import { Proveedor, Resena, EstadoFav } from '@/lib/proveedorTypes';
 import { useAuth } from '@/context/AuthContext';
 import { usePagoGuard } from '@/hooks/usePagoGuard';
@@ -21,16 +21,19 @@ export default function Proveedores() {
   const [favMap, setFavMap] = useState<Record<string, EstadoFav>>({});
   const [resenasMap, setResenasMap] = useState<Record<string, Resena[]>>({});
   const [loading, setLoading] = useState(true);
-  const [filtro, setFiltro] = useState<string>('todos');
   const [busqueda, setBusqueda] = useState('');
-  const [colapsados, setColapsados] = useState<Set<string>>(new Set());
   const router = useRouter();
 
-  // Permite entrar filtrado desde la home: /dashboard/proveedores?cat=jeans
-  useEffect(() => {
-    const cat = router.query.cat;
-    if (typeof cat === 'string' && cat) setFiltro(cat);
-  }, [router.query.cat]);
+  // El filtro vive en la URL: lo eligen el menú lateral en cascata
+  // (?grupo=Moda o ?cat=jeans) y los atajos de la home (?cat=jeans).
+  const cat = typeof router.query.cat === 'string' ? router.query.cat : '';
+  const grupo = typeof router.query.grupo === 'string' ? router.query.grupo : '';
+  const catInfo = cat ? categorias.find(c => c.id === cat) : undefined;
+  const grupoSel = grupo || catInfo?.grupo || '';
+  const idsGrupo = useMemo(
+    () => new Set(categorias.filter(c => (c.grupo || 'Otros') === grupo).map(c => c.id)),
+    [categorias, grupo],
+  );
 
   useEffect(() => {
     if (!authorized) return;
@@ -115,32 +118,14 @@ export default function Proveedores() {
   };
 
   const filtrados = useMemo(() => proveedores.filter(p => {
-    if (filtro !== 'todos' && p.categoria !== filtro) return false;
+    if (cat && p.categoria !== cat) return false;
+    if (!cat && grupo && !idsGrupo.has(p.categoria)) return false;
     if (busqueda) {
       const t = busqueda.toLowerCase();
       return p.nombre.toLowerCase().includes(t) || (p.direccion || '').toLowerCase().includes(t);
     }
     return true;
-  }), [proveedores, filtro, busqueda]);
-
-  // Menú lateral: solo grupos/categorías que tienen proveedores.
-  const menu = useMemo(() => {
-    const counts: Record<string, number> = {};
-    proveedores.forEach(p => { counts[p.categoria] = (counts[p.categoria] || 0) + 1; });
-    return agrupar(categorias)
-      .map(g => ({
-        grupo: g.grupo,
-        total: g.items.reduce((s, c) => s + (counts[c.id] || 0), 0),
-        items: g.items.filter(c => (counts[c.id] || 0) > 0).map(c => ({ ...c, count: counts[c.id] || 0 })),
-      }))
-      .filter(g => g.items.length > 0);
-  }, [proveedores, categorias]);
-
-  const toggleGrupo = (g: string) => setColapsados(prev => {
-    const n = new Set(prev);
-    n.has(g) ? n.delete(g) : n.add(g);
-    return n;
-  });
+  }), [proveedores, cat, grupo, idsGrupo, busqueda]);
 
   if (guardLoading || !authorized) return null;
 
@@ -151,6 +136,15 @@ export default function Proveedores() {
       <div className={styles.header}>
         <h1>Proveedores</h1>
         <p>{proveedores.length} contactos verificados de Brás (São Paulo)</p>
+        {(cat || grupo) && (
+          <div className={styles.filtroActual}>
+            <Link href="/dashboard/proveedores">Todos</Link>
+            {grupoSel && <><FiChevronRight /><Link href={`/dashboard/proveedores?grupo=${encodeURIComponent(grupoSel)}`} className={!cat ? styles.filtroUltimo : ''}>{grupoSel}</Link></>}
+            {cat && <><FiChevronRight /><span className={styles.filtroUltimo}>{catInfo?.label || cat}</span></>}
+            <span className={styles.filtroCount}>{loading ? '' : `${filtrados.length} proveedores`}</span>
+            <Link href="/dashboard/proveedores" className={styles.filtroQuitar} aria-label="Quitar filtro"><FiX /></Link>
+          </div>
+        )}
       </div>
 
       <div className={styles.toolbar}>
@@ -161,35 +155,6 @@ export default function Proveedores() {
       </div>
 
       <div className={styles.layout}>
-        {/* Menú lateral por grupos */}
-        <aside className={styles.sidebar}>
-          <button onClick={() => setFiltro('todos')} className={`${styles.todos} ${filtro === 'todos' ? styles.todosActive : ''}`}>
-            <span>Todos</span><span className={styles.catCount}>{proveedores.length}</span>
-          </button>
-          {menu.map(g => {
-            const abierto = !colapsados.has(g.grupo);
-            return (
-              <div key={g.grupo} className={styles.grp}>
-                <button onClick={() => toggleGrupo(g.grupo)} className={styles.grpHead}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                    {abierto ? <FiChevronDown size={13} /> : <FiChevronRight size={13} />}{g.grupo}
-                  </span>
-                  <span className={styles.catCount}>{g.total}</span>
-                </button>
-                {abierto && (
-                  <div className={styles.grpItems}>
-                    {g.items.map(c => (
-                      <button key={c.id} onClick={() => setFiltro(c.id)} className={`${styles.catBtn} ${filtro === c.id ? styles.catActive : ''}`}>
-                        <span>{c.label}</span><span className={styles.catCount}>{c.count}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </aside>
-
         {/* Grade de proveedores */}
         <div className={styles.main}>
           {loading ? (

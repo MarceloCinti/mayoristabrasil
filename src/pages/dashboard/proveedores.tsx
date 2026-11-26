@@ -135,7 +135,7 @@ export default function Proveedores() {
 
       <div className={styles.header}>
         <h1>Proveedores</h1>
-        <p>{proveedores.length} contactos verificados de Brás (São Paulo)</p>
+        <p>{proveedores.length} contactos verificados de todo Brasil</p>
         {(cat || grupo) && (
           <div className={styles.filtroActual}>
             <Link href="/dashboard/proveedores">Todos</Link>

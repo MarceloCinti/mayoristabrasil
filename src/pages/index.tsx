@@ -7,7 +7,7 @@ import {
   FiAlertTriangle, FiClock, FiPackage, FiStar, FiPlay, FiX, FiImage,
   FiDollarSign, FiTruck, FiAward,
 } from 'react-icons/fi';
-import { PRECIO_GS, PRECIO_NORMAL_GS } from '@/lib/firebase';
+import { usePrecio, sufijoPeriodo } from '@/lib/precio';
 import Reveal from '@/components/Reveal';
 import DashboardPreview from '@/components/DashboardPreview';
 import HeroCarrusel from '@/components/HeroCarrusel';
@@ -33,6 +33,8 @@ const sinBras = (t = ''): string => t
   .trim();
 
 export default function Landing() {
+  const precio = usePrecio();
+  const per = sufijoPeriodo(precio.periodo);
   const { config } = useLandingConfig();
   const { stats } = useStats();
   const { items: preview } = usePreview();
@@ -55,7 +57,7 @@ export default function Landing() {
       <div className={styles.page}>
         {/* ===== URGENCY TOPBAR ===== */}
         <div className={styles.urgency}>
-          <span className={styles.urgencyDot} /> Precio promocional de lanzamiento — sube pronto · <strong>{fmt(PRECIO_GS)}/mes</strong>
+          <span className={styles.urgencyDot} /> Precio promocional de lanzamiento — sube pronto · <strong>{fmt(precio.precioGs)}{per}</strong>
         </div>
 
         {/* ===== NAV ===== */}
@@ -516,8 +518,8 @@ export default function Landing() {
                   ))}
                 </ul>
                 <div className={styles.priceNumbers}>
-                  <span className={styles.priceOld}>{fmt(PRECIO_NORMAL_GS)}/mes</span>
-                  <span className={styles.priceNew}>{fmt(PRECIO_GS)}<span style={{ fontSize: '0.4em', color: 'var(--text-mut)', fontWeight: 500, marginLeft: 8 }}>/mes</span></span>
+                  {precio.precioNormalGs > precio.precioGs && <span className={styles.priceOld}>{fmt(precio.precioNormalGs)}{per}</span>}
+                  <span className={styles.priceNew}>{fmt(precio.precioGs)}<span style={{ fontSize: '0.4em', color: 'var(--text-mut)', fontWeight: 500, marginLeft: 8 }}>{per}</span></span>
                 </div>
                 <span className={styles.priceSub}>precio promocional de lanzamiento · cancelás cuando quieras</span>
                 <Link href="/registro" className="btn btn-primary" style={{ width: '100%', fontSize: 17, padding: '17px 32px', marginTop: 18 }}>
@@ -556,7 +558,7 @@ export default function Landing() {
           <div className="container" style={{ position: 'relative', zIndex: 1 }}>
             <Reveal>
               <h2 className={styles.h2} style={{ fontSize: 40 }}>Empezá hoy tu negocio de reventa</h2>
-              <p className={styles.sub} style={{ marginBottom: 28 }}>Acceso inmediato · {fmt(PRECIO_GS)}/mes · soporte humano</p>
+              <p className={styles.sub} style={{ marginBottom: 28 }}>Acceso inmediato · {fmt(precio.precioGs)}{per} · soporte humano</p>
               <Link href="/registro" className="btn" style={{ fontSize: 17, padding: '17px 36px', background: '#fff', color: 'var(--rojo)', fontWeight: 800, boxShadow: '0 12px 34px -10px rgba(0,0,0,.35)' }}>
                 Acceder ahora <FiArrowRight />
               </Link>

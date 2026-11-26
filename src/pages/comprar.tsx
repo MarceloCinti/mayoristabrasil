@@ -5,7 +5,8 @@ import { useRouter } from 'next/router';
 import { FaCheckCircle, FaWhatsapp } from 'react-icons/fa';
 import { FiClock } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
-import { WHATSAPP, PRECIO_GS, PRECIO_NORMAL_GS } from '@/lib/firebase';
+import { WHATSAPP } from '@/lib/firebase';
+import { usePrecio, sufijoPeriodo } from '@/lib/precio';
 import PagoOpciones from '@/components/PagoOpciones';
 import styles from './comprar.module.css';
 
@@ -25,6 +26,7 @@ const BENEFICIOS = [
 const formatGs = (n: number) => 'Gs. ' + n.toLocaleString('es-PY');
 
 export default function Comprar() {
+  const precio = usePrecio();
   const router = useRouter();
   const { user, userData, loading } = useAuth();
 
@@ -49,8 +51,8 @@ export default function Comprar() {
 
           <div className={styles.box}>
             <h1 className={styles.title}>Acceso al sistema completo</h1>
-            <div className={styles.precioOld}>Precio normal {formatGs(PRECIO_NORMAL_GS)}/mes</div>
-            <div className={styles.precio}>{formatGs(PRECIO_GS)} <span>/mes</span></div>
+            {precio.precioNormalGs > precio.precioGs && <div className={styles.precioOld}>Precio normal {formatGs(precio.precioNormalGs)}{sufijoPeriodo(precio.periodo)}</div>}
+            <div className={styles.precio}>{formatGs(precio.precioGs)} <span>{sufijoPeriodo(precio.periodo)}</span></div>
             <p className={styles.sub}>Suscripción mensual · precio promocional de lanzamiento</p>
 
             <ul className={styles.beneficios}>

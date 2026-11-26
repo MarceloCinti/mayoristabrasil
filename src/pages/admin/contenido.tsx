@@ -8,7 +8,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import styles from './admin.module.css';
 
 const SECCIONES = [
-  { id: 'mapa', label: 'Mapa Estratégico de Brás', desc: 'Calles, horarios, zonas seguras, dónde comer y cómo negociar' },
+  { id: 'mapa', label: 'Mapa Estratégico de Brasil', desc: 'Calles, horarios, zonas seguras, dónde comer y cómo negociar' },
   { id: 'importar', label: 'Datos para la Importación', desc: 'Contactos de transportadoras, redespacho y excursiones' },
   { id: 'tendencias', label: 'Tendencias de la Semana', desc: 'Lo que más vende, modelos virales, productos con mayor margen' },
   { id: 'estafas', label: 'Lista de Estafas', desc: 'Proveedores falsos, Instagram fake, estafas de PIX y de flete' },

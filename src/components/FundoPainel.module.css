@@ -54,12 +54,39 @@
 }
 @keyframes gira { to { transform: rotate(360deg); } }
 
+/* ===== Estrelas douradas caindo ===== */
+.estrelas { position: absolute; inset: 0; transform: translate3d(calc(var(--mx) * 14px), 0, 0); }
+.queda {
+  position: absolute; top: -40px; display: block;
+  animation: cair linear infinite;
+}
+.estrela {
+  display: block;
+  background: linear-gradient(135deg, #FFF3B0 0%, #FFD447 35%, #F2C40C 60%, #B88A00 100%);
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  filter: drop-shadow(0 0 6px rgba(242,196,12,.85));
+  animation: cintila ease-in-out infinite alternate;
+}
+@keyframes cair {
+  0%   { transform: translate3d(0, 0, 0) rotate(0); opacity: 0; }
+  8%   { opacity: .95; }
+  50%  { transform: translate3d(var(--balanco), 55vh, 0) rotate(calc(var(--giro) / 2)); }
+  90%  { opacity: .85; }
+  100% { transform: translate3d(0, calc(100vh + 60px), 0) rotate(var(--giro)); opacity: 0; }
+}
+@keyframes cintila {
+  from { transform: scale(.75); opacity: .55; }
+  to   { transform: scale(1.12); opacity: 1; }
+}
+
 @media (max-width: 900px) {
+  .queda:nth-child(2n) { display: none; }
   .mancha { filter: blur(45px); }
   .verde, .amarelo, .azul { width: 380px; height: 360px; }
   .anel { width: 220px; height: 220px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .mancha, .anel { animation: none; }
+  .estrelas { display: none; }
   .camada, .pontos { transform: none !important; }
 }

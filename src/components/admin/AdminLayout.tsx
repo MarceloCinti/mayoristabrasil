@@ -2,7 +2,7 @@ import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import { FaUsers, FaStore, FaBookOpen, FaGift, FaSignOutAlt, FaArrowLeft, FaBars, FaTimes, FaTachometerAlt, FaDesktop, FaHandshake, FaMoneyBillWave, FaEnvelope, FaExchangeAlt, FaCreditCard, FaGraduationCap, FaHome } from 'react-icons/fa';
+import { FaUsers, FaStore, FaBookOpen, FaGift, FaSignOutAlt, FaArrowLeft, FaBars, FaTimes, FaTachometerAlt, FaDesktop, FaHandshake, FaMoneyBillWave, FaEnvelope, FaExchangeAlt, FaCreditCard, FaGraduationCap, FaHome, FaTags } from 'react-icons/fa';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 import FundoPainel from '../FundoPainel';
@@ -15,6 +15,7 @@ const NAV = [
   { href: '/admin/usuarios', label: 'Usuarios', icon: <FaUsers /> },
   { href: '/admin/afiliados', label: 'Afiliados', icon: <FaHandshake /> },
   { href: '/admin/pagos', label: 'Pagos', icon: <FaMoneyBillWave /> },
+  { href: '/admin/precios', label: 'Precificación', icon: <FaTags /> },
   { href: '/admin/datos-pago', label: 'Datos de pago', icon: <FaCreditCard /> },
   { href: '/admin/cambio', label: 'Cambio', icon: <FaExchangeAlt /> },
   { href: '/admin/emails', label: 'Emails', icon: <FaEnvelope /> },

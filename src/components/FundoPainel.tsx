@@ -1,5 +1,20 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import styles from './FundoPainel.module.css';
+
+// Estrelas douradas caindo. Valores fixos (não aleatórios a cada render)
+// para o servidor e o navegador desenharem igual.
+const ESTRELAS = Array.from({ length: 28 }, (_, i) => {
+  const r = (n: number) => ((Math.sin(i * 12.9898 + n * 78.233) * 43758.5453) % 1 + 1) % 1;
+  return {
+    left: `${(r(1) * 100).toFixed(1)}%`,
+    tam: 12 + Math.round(r(2) * 18),         // 12–30 px
+    dur: (11 + r(3) * 14).toFixed(1) + 's',  // 11–25 s para atravessar a tela
+    atraso: (-r(4) * 25).toFixed(1) + 's',   // negativo: já começa espalhado
+    balanco: Math.round(30 + r(5) * 70) * (r(6) > .5 ? 1 : -1) + 'px',
+    giro: (r(7) > .5 ? 1 : -1) * (180 + Math.round(r(8) * 360)) + 'deg',
+    brilho: (1.6 + r(9) * 2.4).toFixed(1) + 's',
+  };
+});
 
 /**
  * Fundo animado das áreas logadas (painel, admin, afiliado).
@@ -59,6 +74,14 @@ export default function FundoPainel() {
       <div className={`${styles.camada} ${styles.c3}`}><span className={`${styles.mancha} ${styles.azul}`} /></div>
       <div className={`${styles.camada} ${styles.c4}`}><span className={`${styles.mancha} ${styles.verde2}`} /></div>
       <div className={`${styles.camada} ${styles.c5}`}><span className={styles.anel} /></div>
+      <div className={styles.estrelas}>
+        {ESTRELAS.map((e, i) => (
+          <span key={i} className={styles.queda}
+            style={{ left: e.left, animationDuration: e.dur, animationDelay: e.atraso, ['--balanco' as string]: e.balanco, ['--giro' as string]: e.giro } as React.CSSProperties}>
+            <span className={styles.estrela} style={{ width: e.tam, height: e.tam, animationDuration: e.brilho }} />
+          </span>
+        ))}
+      </div>
     </div>
   );
 }

@@ -14,6 +14,7 @@ import { usePagoGuard } from '@/hooks/usePagoGuard';
 import { useAuth } from '@/context/AuthContext';
 import DashboardLayout from '@/components/DashboardLayout';
 import Foto from '@/components/Foto';
+import BannerArte from '@/components/BannerArte';
 import styles from './index.module.css';
 
 const TIPS = [
@@ -93,8 +94,10 @@ function Banners({ banners }: { banners: BannerInicio[] }) {
         >
           {b.imagen && <div className={styles.bannerImg} style={{ backgroundImage: `url("${b.imagen}")` }} />}
           <div className={styles.bannerVeu} />
-          <span className={styles.bannerOrbe} />
-          <span className={`${styles.bannerOrbe} ${styles.bannerOrbe2}`} />
+          {b.arte ? <BannerArte arte={b.arte} /> : (<>
+            <span className={styles.bannerOrbe} />
+            <span className={`${styles.bannerOrbe} ${styles.bannerOrbe2}`} />
+          </>)}
           <div className={styles.bannerTexto}>
             <motion.h2 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .25, duration: .5 }}>{b.titulo}</motion.h2>
             {b.texto && <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .38, duration: .5 }}>{b.texto}</motion.p>}
@@ -207,7 +210,7 @@ export default function Dashboard() {
         <div className={styles.heroTexto}>
           <span className={styles.heroPill}><span className={styles.pulso} /> Base actualizada</span>
           <h1>Hola, <span className={styles.grad}>{userData?.nombre?.split(' ')[0] || 'revendedor'}</span></h1>
-          <p>Tu central para comprar en Brás y revender en Paraguay.</p>
+          <p>Tu central para comprar en Brasil y revender en Paraguay.</p>
         </div>
         <div className={styles.heroStats}>
           <div><FaStore /><strong>{proveedores.length ? <Contador valor={proveedores.length} /> : '…'}</strong><span>Proveedores</span></div>

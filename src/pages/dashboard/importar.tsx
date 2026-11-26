@@ -13,7 +13,7 @@ export default function Importar() {
       <SeccionContenido
         seccionId="importar"
         titulo="Datos para la Importación"
-        descripcion="Contactos de transportadoras, redespacho y excursiones que traen tu mercadería del Brás a Paraguay"
+        descripcion="Contactos de transportadoras, redespacho y excursiones que traen tu mercadería de Brasil a Paraguay"
         icon={<FaTruck />}
       />
     </DashboardLayout>

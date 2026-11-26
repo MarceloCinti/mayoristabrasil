@@ -9,10 +9,10 @@ export default function Mapa() {
   if (loading || !authorized) return null;
   return (
     <DashboardLayout>
-      <Head><title>Mapa de Brás — Mayorista Brasil</title></Head>
+      <Head><title>Mapa de Brasil — Mayorista Brasil</title></Head>
       <SeccionContenido
         seccionId="mapa"
-        titulo="Mapa Estratégico de Brás"
+        titulo="Mapa Estratégico de Brasil"
         descripcion="Calles, horarios, zonas seguras, dónde comer y cómo negociar"
         icon={<FaMapMarkedAlt />}
       />

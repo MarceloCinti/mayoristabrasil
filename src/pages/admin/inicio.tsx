@@ -12,6 +12,7 @@ import {
 import { useAdminGuard } from '@/hooks/useAdminGuard';
 import AdminLayout from '@/components/admin/AdminLayout';
 import MediaUpload from '@/components/admin/MediaUpload';
+import { ARTES } from '@/components/BannerArte';
 import styles from './admin.module.css';
 
 type Lista = 'banners' | 'novedades' | 'videos';
@@ -113,11 +114,11 @@ export default function AdminInicio() {
             <div style={linhaTopo}>
               <h3 className={styles.sectionTitle} style={{ margin: 0 }}>Banners que pasan ({cfg.banners.length})</h3>
               <div className={styles.rowActions}>
-                {!cfg.banners.length && <button type="button" className={`${styles.btnSm} ${styles.btnSmGhost}`} onClick={copiarPadrao}>Partir de los 3 predeterminados</button>}
+                {!cfg.banners.length && <button type="button" className={`${styles.btnSm} ${styles.btnSmGhost}`} onClick={copiarPadrao}>Partir de los 4 predeterminados</button>}
                 <button type="button" className={styles.btnSm} onClick={addBanner}><FiPlus /> Agregar banner</button>
               </div>
             </div>
-            {!cfg.banners.length && <p style={{ color: 'var(--text-mut)', fontSize: 13 }}>Sin banners propios: el inicio muestra 3 banners predeterminados.</p>}
+            {!cfg.banners.length && <p style={{ color: 'var(--text-mut)', fontSize: 13 }}>Sin banners propios: el inicio muestra 4 banners predeterminados.</p>}
             {cfg.banners.map((b, k) => (
               <div key={b.id} style={bloco}>
                 <div style={linhaTopo}><strong>Banner {k + 1}</strong>{controles('banners', b.id, b.activo, 'activo')}</div>
@@ -129,7 +130,12 @@ export default function AdminInicio() {
                     <div className={styles.formField}><label>Enlace (ej. /dashboard/secretos o https://…)</label><input value={b.enlace} onChange={e => editar('banners', b.id, 'enlace', e.target.value)} /></div>
                     <div className={styles.formField}><label>Color (si no hay foto, o debajo de ella)</label>
                       <select value={b.tema} onChange={e => editar('banners', b.id, 'tema', e.target.value)}>
-                        <option value="verde">Verde</option><option value="azul">Azul</option><option value="amarelo">Amarillo</option>
+                        <option value="verde">Verde</option><option value="azul">Azul</option><option value="amarelo">Amarillo</option><option value="noche">Azul noche</option>
+                      </select>
+                    </div>
+                    <div className={styles.formField}><label>Ilustración animada</label>
+                      <select value={b.arte || ''} onChange={e => editar('banners', b.id, 'arte', e.target.value)}>
+                        {ARTES.map(a => <option key={a.id} value={a.id}>{a.label}</option>)}
                       </select>
                     </div>
                   </div>

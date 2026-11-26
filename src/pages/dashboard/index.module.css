@@ -53,6 +53,9 @@
 .tema_verde   { background: linear-gradient(120deg, #0B5F2B, #12803B 55%, #2FA35A); }
 .tema_azul    { background: linear-gradient(120deg, #12276B, #1D3F94 55%, #2F63C9); }
 .tema_amarelo { background: linear-gradient(120deg, #9C7400, #E0B100 50%, #F2C40C); }
+.tema_noche   { background: linear-gradient(120deg, #0A1B4D, #12276B 45%, #0B5F2B); }
+.banner::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.14) 45%, transparent 60%); background-size: 250% 100%; animation: brilhoBanner 6s ease-in-out infinite; }
+@keyframes brilhoBanner { 0% { background-position: 150% 0; } 60%,100% { background-position: -60% 0; } }
 .bannerImg { position: absolute; inset: 0; background-size: cover; background-position: center; animation: kenBurns 12s ease-out forwards; }
 @keyframes kenBurns { from { transform: scale(1.12); } to { transform: scale(1); } }
 .bannerVeu { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8,20,40,.72) 0%, rgba(8,20,40,.35) 55%, transparent 100%); }
@@ -60,7 +63,7 @@
 .bannerOrbe { position: absolute; right: 8%; top: 50%; width: 260px; height: 260px; margin-top: -130px; border-radius: 50%; pointer-events: none;
   border: 2px solid rgba(255,255,255,.22); box-shadow: inset 0 0 0 30px rgba(255,255,255,.06); animation: gira 30s linear infinite; }
 .bannerOrbe2 { right: 2%; width: 140px; height: 140px; margin-top: -170px; border-style: dashed; animation-duration: 18s; animation-direction: reverse; }
-.bannerTexto { position: relative; z-index: 1; padding: 0 56px; max-width: 640px; }
+.bannerTexto { position: relative; z-index: 2; padding: 0 56px; max-width: min(620px, 58%); }
 .bannerTexto h2 { font-size: 30px; line-height: 1.12; color: #fff; margin-bottom: 8px; text-shadow: 0 2px 18px rgba(0,0,0,.25); }
 .bannerTexto p { font-size: 15.5px; color: rgba(255,255,255,.88); margin-bottom: 18px; }
 .bannerBtn {
@@ -203,7 +206,7 @@
   .hero h1 { font-size: 24px; }
   .heroStats > div { min-width: 0; flex: 1; }
   .banners { aspect-ratio: auto; height: 260px; }
-  .bannerTexto { padding: 0 24px; }
+  .bannerTexto { padding: 0 24px; max-width: none; }
   .bannerTexto h2 { font-size: 22px; }
   .bannerDots { left: 24px; }
   .bannerOrbe { display: none; }

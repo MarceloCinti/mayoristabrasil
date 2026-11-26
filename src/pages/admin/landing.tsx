@@ -73,7 +73,7 @@ export default function AdminLanding() {
             <div className={styles.formGrid}>
               <div className={styles.formField} style={{ gridColumn: '1 / -1' }}>
                 <label>Título (dejar vacío para usar el predeterminado)</label>
-                <input value={cfg.heroTitle} onChange={e => set('heroTitle', e.target.value)} placeholder="Comprá directo del Brás y revendé en Paraguay" />
+                <input value={cfg.heroTitle} onChange={e => set('heroTitle', e.target.value)} placeholder="Comprá directo de Brasil y revendé en Paraguay" />
               </div>
               <div className={styles.formField} style={{ gridColumn: '1 / -1' }}>
                 <label>Subtítulo (vacío = predeterminado)</label>

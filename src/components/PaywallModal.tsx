@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { FiClock, FiLock } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
-import { WHATSAPP, PRECIO_GS } from '@/lib/firebase';
+import { WHATSAPP } from '@/lib/firebase';
+import { usePrecio, sufijoPeriodo } from '@/lib/precio';
 import { useAuth } from '@/context/AuthContext';
 import { PLAZO_TRANSFERENCIA_MS } from '@/lib/trial';
 import PagoOpciones from './PagoOpciones';
@@ -31,6 +32,7 @@ function useCuentaRegresiva(desde?: any) {
 }
 
 export default function PaywallModal() {
+  const precio = usePrecio();
   const { user, userData, logout } = useAuth();
   const restante = useCuentaRegresiva(userData?.pagoSolicitadoEn);
 
@@ -81,7 +83,7 @@ export default function PaywallModal() {
         <p className={styles.sub}>
           Activá tu suscripción para seguir usando la plataforma completa.
         </p>
-        <div className={styles.precio}>{fmtGs(PRECIO_GS)}<span>/mes</span></div>
+        <div className={styles.precio}>{fmtGs(precio.precioGs)}<span>{sufijoPeriodo(precio.periodo)}</span></div>
 
         <PagoOpciones />
 

@@ -38,7 +38,7 @@ export const DEFAULT_LANDING: LandingConfig = {
   proofShots: ['', '', '', ''],
   testimonios: [
     { nombre: 'María G.', ciudad: 'Asunción', texto: 'Recuperé la inversión en la primera compra. Encontré proveedores que jamás hubiera encontrado sola.' },
-    { nombre: 'Carlos R.', ciudad: 'Ciudad del Este', texto: 'Mejores proveedores que los grupos de Facebook. El mapa del Brás me ahorró horas.' },
+    { nombre: 'Carlos R.', ciudad: 'Ciudad del Este', texto: 'Mejores proveedores que los grupos de Facebook. El mapa estratégico me ahorró horas.' },
     { nombre: 'Lorena M.', ciudad: 'Encarnación', texto: 'Lo mejor fue evitar proveedores falsos. Compro más barato y vendo más.' },
   ],
 };

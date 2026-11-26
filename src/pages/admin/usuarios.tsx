@@ -4,7 +4,8 @@ import { collection, getDocs, doc, updateDoc, deleteDoc, serverTimestamp, query,
 import { sendPasswordResetEmail } from 'firebase/auth';
 import toast from 'react-hot-toast';
 import { FiArchive, FiTrash2, FiKey, FiRotateCcw, FiFilter, FiStar, FiX, FiShield } from 'react-icons/fi';
-import { db, auth, PRECIO_GS } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
+import { usePrecio } from '@/lib/precio';
 import { useAdminGuard } from '@/hooks/useAdminGuard';
 import { DEPARTAMENTOS, CIUDADES, GENEROS, calcularEdad } from '@/lib/paraguay';
 import AdminLayout from '@/components/admin/AdminLayout';
@@ -48,6 +49,7 @@ const toDate = (ts: any): Date | null => (ts?.toDate ? ts.toDate() : null);
 
 export default function AdminUsuarios() {
   const { isAdmin, loading: guardLoading } = useAdminGuard();
+  const precio = usePrecio();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [showFiltros, setShowFiltros] = useState(false);
@@ -88,7 +90,7 @@ export default function AdminUsuarios() {
     const nuevo = !u.pago;
     try {
       await updateDoc(doc(db, 'usuarios', u.uid), {
-        pago: nuevo, fechaCompra: nuevo ? serverTimestamp() : null, montoPagado: nuevo ? PRECIO_GS : 0,
+        pago: nuevo, fechaCompra: nuevo ? serverTimestamp() : null, montoPagado: nuevo ? precio.precioGs : 0,
         // al liberar, el aviso de transferencia deja de estar pendiente
         pagoPendiente: false,
       });

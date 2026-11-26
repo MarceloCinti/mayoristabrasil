@@ -13,7 +13,8 @@ export interface BannerInicio {
   imagen: string;        // URL (vazio = só gradiente)
   enlace: string;        // rota interna (/dashboard/...) ou link externo
   boton: string;         // texto do botão
-  tema: 'verde' | 'azul' | 'amarelo';
+  tema: 'verde' | 'azul' | 'amarelo' | 'noche';
+  arte?: '' | 'proveedores' | 'secretos' | 'bonos' | 'academia';  // ilustração animada
   activo: boolean;
 }
 
@@ -46,9 +47,10 @@ export const nuevoId = () => Math.random().toString(36).slice(2, 10);
 
 /** Banners de fábrica: aparecem enquanto o admin não cadastrar nenhum. */
 export const BANNERS_PADRAO: BannerInicio[] = [
-  { id: 'p1', titulo: 'Más de 1.000 proveedores de Brás y alrededores', texto: 'Fábricas, mayoristas y distribuidores con contacto directo.', imagen: '', enlace: '/dashboard/proveedores', boton: 'Ver proveedores', tema: 'verde', activo: true },
-  { id: 'p2', titulo: 'Proveedores secretos', texto: 'Fábricas escondidas que casi nadie conoce. Precio de origen.', imagen: '', enlace: '/dashboard/secretos', boton: 'Descubrir', tema: 'azul', activo: true },
-  { id: 'p3', titulo: 'Diccionario del Negociador', texto: '204 mensajes listos para copiar y negociar en portugués.', imagen: '', enlace: '/dashboard/mensajes', boton: 'Abrir bono', tema: 'amarelo', activo: true },
+  { id: 'p1', titulo: 'Proveedores de todo Brasil, en un solo lugar', texto: 'Fábricas, mayoristas y distribuidores con contacto directo, fotos y WhatsApp.', imagen: '', enlace: '/dashboard/proveedores', boton: 'Ver proveedores', tema: 'verde', arte: 'proveedores', activo: true },
+  { id: 'p2', titulo: 'Proveedores Secretos', texto: 'Fábricas que casi nadie conoce, con precio de origen. Solo para miembros.', imagen: '', enlace: '/dashboard/secretos', boton: 'Descubrir', tema: 'azul', arte: 'secretos', activo: true },
+  { id: 'p3', titulo: '4 bonos incluidos en tu acceso', texto: 'Diccionario del Negociador, Academia Mayorista y más, sin pagar nada extra.', imagen: '', enlace: '/dashboard/bonos', boton: 'Ver mis bonos', tema: 'amarelo', arte: 'bonos', activo: true },
+  { id: 'p4', titulo: 'Academia Mayorista', texto: 'Paso a paso para comprar mejor, negociar en portugués y revender con margen.', imagen: '', enlace: '/dashboard/curso', boton: 'Empezar el curso', tema: 'noche', arte: 'academia', activo: true },
 ];
 
 export const DEFAULT_INICIO: InicioConfig = { banners: [], novedades: [], videos: [], destacados: [] };

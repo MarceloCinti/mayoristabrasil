@@ -23,6 +23,13 @@ const LIBERAN = ['PURCHASE_APPROVED', 'PURCHASE_COMPLETE'];
 const REVOCAN = ['PURCHASE_REFUNDED', 'PURCHASE_CHARGEBACK'];
 
 const PRECIO_GS = Number(process.env.NEXT_PUBLIC_PRECIO_GS || 89000);
+// Valor editado em /admin/precios (config/precio); se faltar, a env var.
+async function precioAtual(db: { collection: (c: string) => any }): Promise<number> {
+  try {
+    const v = (await db.collection('config').doc('precio').get()).data()?.precioGs;
+    return typeof v === 'number' && v > 0 ? v : PRECIO_GS;
+  } catch { return PRECIO_GS; }
+}
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'contingenciamc1@gmail.com';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -64,7 +71,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await ref.update({
         pago: true,
         fechaCompra: FieldValue.serverTimestamp(),
-        montoPagado: PRECIO_GS,
+        montoPagado: await precioAtual(db),
         pagoPendiente: false,
         pagoMetodo: 'hotmart',
         hotmartTransaccion: transaccion,

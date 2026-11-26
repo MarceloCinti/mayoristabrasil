@@ -48,12 +48,13 @@ const db = getFirestore();
   for (const d of resenas.docs) {
     const r = d.data();
     const novo = {};
-    const a = apodo.get(r.uid) || sugerirApodo(r.nombre || '', r.uid || d.id);
+    // conta apagada: mantém o apodo já gravado (senão muda a cada execução)
+    const a = apodo.get(r.uid) || r.nickname || sugerirApodo(r.nombre || '', r.uid || d.id);
     if (r.nombre !== a || r.nickname !== a) { novo.nombre = a; novo.nickname = a; }
     if (Array.isArray(r.respuestas) && r.respuestas.length) {
       let mudou = false;
       const rs = r.respuestas.map(x => {
-        const ax = apodo.get(x.uid) || sugerirApodo(x.nombre || '', x.uid || '');
+        const ax = apodo.get(x.uid) || x.nickname || sugerirApodo(x.nombre || '', x.uid || '');
         if (x.nombre !== ax || x.nickname !== ax) { mudou = true; respMudam++; return { ...x, nombre: ax, nickname: ax }; }
         return x;
       });
